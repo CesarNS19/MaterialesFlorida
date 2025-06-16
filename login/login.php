@@ -99,7 +99,7 @@ if (isset($_SESSION['status_message'])) {
 
                             <div class="mb-3 mt-4">
                                 <label for="contrasena" class="form-label">Contraseña</label>
-                                <input type="password" name="contrasena" class="form-control" id="contrasena" placeholder="Ingrese su contraseña">
+                                <input type="password" name="contrasena" class="form-control" id="contrasena" placeholder="Ingrese su contraseña" required>
                             </div>
 
                             <div class="form-check mb-4 mt-4">
@@ -214,9 +214,6 @@ if (isset($_SESSION['status_message'])) {
                 }
             });
         });
-
-        
 </script>
-
 </body>
 </html>
