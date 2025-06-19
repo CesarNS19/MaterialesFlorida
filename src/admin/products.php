@@ -11,6 +11,25 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 }
 ?>
 
+<style>
+    .custom-orange-btn {
+        background-color: #ff8c00 !important;
+        border-color: #ff8c00 !important;
+        color: white !important;
+    }
+
+    .custom-orange-btn:hover {
+        background-color: #e67600;
+        border-color: #e67600;
+    }
+
+    .custom-orange-bg {
+        background-color: #ff8c00 !important;
+        border-color: #ff8c00 !important;
+        color: white !important;
+    }
+</style>
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -19,15 +38,13 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 <title><?php echo $title; ?></title>
 
 <div id="Alert" class="container"></div>
+<button data-bs-toggle="modal" data-bs-target="#addProductsModal" class="btn custom-orange-btn w-100 mb-3">Agregar Producto</button>
 
-<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductsModal" style="float: right; margin: 10px;">
-            Agregar Producto
-        </button>
 <!-- Modal para añadir productos -->
 <div class="modal fade" id="addProductsModal" tabindex="-1" role="dialog" aria-labelledby="addProductsModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header custom-orange-bg text-white">
                 <h5 class="modal-title" id="addProductsModalLabel">Agregar Nuevo Producto</h5>
             </div>
             <form action="products/add_product.php" method="POST" enctype="multipart/form-data">
@@ -59,7 +76,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="submit" class="btn btn-primary">Agregar Producto</button>
+                    <button type="submit" class="btn custom-orange-btn">Agregar Producto</button>
                 </div>
             </form>
         </div>
