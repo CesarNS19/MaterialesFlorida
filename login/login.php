@@ -69,6 +69,25 @@ if (isset($_SESSION['status_message'])) {
             font-weight: bold;
             font-size: 36px;
         }
+
+        .custom-orange-bg {
+            background-color: #ff8c00;
+        }
+
+        .custom-orange-text {
+            color: #ff8c00;
+        }
+
+        .custom-orange-btn {
+            background-color: #ff8c00;
+            border-color: #ff8c00;
+            color: white;
+        }
+
+        .custom-orange-btn:hover {
+            background-color: #e67600;
+            border-color: #e67600;
+        }
     </style>
 </head>
 
@@ -78,7 +97,7 @@ if (isset($_SESSION['status_message'])) {
             <div class="col-md-8 mx-auto">
                 <div class="row login-container">
 
-                    <div class="col-md-6 d-none d-md-flex animation-container bg-primary">
+                    <div class="col-md-6 d-none d-md-flex animation-container custom-orange-bg">
                         <h3 class="mb-3 texto">MATERIALES LA FLORIDA</h3>
                         <div class="d-flex justify-content-around w-100 mt-5">
                             <i class="fas fa-hard-hat furniture-icon"></i>
@@ -89,7 +108,7 @@ if (isset($_SESSION['status_message'])) {
                     </div>
 
                     <div class="col-md-6 p-5" id="form-container">
-                        <h2 class="text-center login-title mb-4 text-primary mt-4">Iniciar Sesión</h2>
+                        <h2 class="text-center login-title mb-4 custom-orange-text mt-4">Iniciar Sesión</h2>
                         <form action="login_proccess.php" method="POST">
                             <div id="Alert"></div>
                             <div class="mb-3 mt-4">
@@ -109,7 +128,7 @@ if (isset($_SESSION['status_message'])) {
                                 </label>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100 mb-3">Iniciar Sesión</button>
+                            <button type="submit" class="btn custom-orange-btn w-100 mb-3">Iniciar Sesión</button>
 
                             <div class="text-center mt-2">
                                 <a href="?form=forgot_password" class="link-secondary text-decoration-none">¿Olvidaste tu contraseña?</a>
@@ -128,14 +147,14 @@ if (isset($_SESSION['status_message'])) {
 
         if (formType === "forgot_password") {
             document.getElementById('form-container').innerHTML = `
-                <h2 class="text-center login-title mb-4 text-primary mt-5">Recuperar Contraseña</h2>
+                <h2 class="text-center login-title mb-4 custom-orange-text mt-5">Recuperar Contraseña</h2>
                 <form action="forgot_password_process.php" method="POST">
                     <div id="Alert"></div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Correo Electrónico</label>
                         <input type="email" name="email" class="form-control" placeholder="Ingrese su correo">
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 mb-3">Enviar Correo</button>
+                    <button type="submit" class="btn custom-orange-btn w-100 mb-3">Enviar Correo</button>
                     <div class="text-center mt-2">
                         <a href="login.php" class="link-secondary text-decoration-none">¿Ya tienes una cuenta? Inicia sesión aquí</a>
                     </div>

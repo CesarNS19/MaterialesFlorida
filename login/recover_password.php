@@ -69,6 +69,25 @@ if (isset($_SESSION['status_message'])) {
             font-weight: bold;
             font-size: 36px;
         }
+
+        .custom-orange-bg {
+            background-color: #ff8c00;
+        }
+
+        .custom-orange-text {
+            color: #ff8c00;
+        }
+
+        .custom-orange-btn {
+            background-color: #ff8c00;
+            border-color: #ff8c00;
+            color: white;
+        }
+
+        .custom-orange-btn:hover {
+            background-color: #e67600;
+            border-color: #e67600;
+        }
     </style>
 </head>
 
@@ -78,7 +97,7 @@ if (isset($_SESSION['status_message'])) {
         <div class="col-md-8 mx-auto">
             <div class="row login-container">
 
-                <div class="col-md-6 d-none d-md-flex animation-container bg-primary">
+                <div class="col-md-6 d-none d-md-flex animation-container custom-orange-bg">
                     <h3 class="mb-3 texto">MATERIALES LA FLORIDA</h3>
                     <div class="d-flex justify-content-around w-100 mt-5">
                             <i class="fas fa-hard-hat furniture-icon"></i>
@@ -89,7 +108,7 @@ if (isset($_SESSION['status_message'])) {
                 </div>
 
                 <div class="col-md-6 p-5" id="form-container">
-                    <h2 class="text-center login-title mb-4 text-primary mt-4">Reestablecer Contraseña</h2>
+                    <h2 class="text-center login-title mb-4 custom-orange-text mt-4">Reestablecer Contraseña</h2>
                     <form action="reset_password.php" method="POST" onsubmit="return confirmSubmit()">
                         <div id="Alert"></div>
                         <div class="mb-3">
@@ -104,7 +123,7 @@ if (isset($_SESSION['status_message'])) {
                             <label for="confirm_password" class="form-label">Confirmar Contraseña</label>
                             <input id="confirm_password" type="password" name="confirm_password" class="form-control" placeholder="Confirmar Contraseña" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 mb-3">Restablecer Contraseña</button>
+                        <button type="submit" class="btn custom-orange-btn w-100 mb-3">Restablecer Contraseña</button>
                         <div class="text-center mt-2">
                             <a href="login.php" class="link-secondary text-decoration-none">¿Ya tienes una cuenta? Inicia sesión aquí</a>
                         </div>
@@ -116,75 +135,7 @@ if (isset($_SESSION['status_message'])) {
 </div>
 
 <script>
-    function mostrarFormulario(formType) {
-        if (formType === "register") {
-            document.getElementById('form-container').innerHTML = `
-                <h2 class="text-center login-title mb-4 text-primary">Registro</h2>
-                <form action="register_process.php" method="POST">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="nombre" class="form-label">Nombre</label>
-                            <input type="text" name="nombre" class="form-control" id="nombre">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="apellido_paterno" class="form-label">Apellido Paterno</label>
-                            <input type="text" name="apellido_paterno" class="form-control" id="apellido_paterno">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="apellido_materno" class="form-label">Apellido Materno</label>
-                            <input type="text" name="apellido_materno" class="form-control" id="apellido_materno">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="telefono" class="form-label">Teléfono</label>
-                            <input type="text" name="telefono" class="form-control" id="telefono">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Correo Electrónico</label>
-                        <input type="email" name="email" class="form-control" id="email">
-                    </div>
-                    <div class="row">
-                        <div class="mb-3 col-md-6">
-                            <label for="contrasena" class="form-label">Contraseña</label>
-                            <input type="password" name="contrasena" class="form-control" id="contrasena" placeholder="Contraseña">
-                        </div>
-                        <div class="mb-3 col-md-6">
-                            <label for="confirmar_contrasena" class="form-label">Confirmar</label>
-                            <input type="password" name="confirmar_contrasena" class="form-control" id="confirmar_contrasena" placeholder="Confirmar contraseña">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 mb-3">Registrar</button>
-                    <div class="text-center mt-2">
-                        <a href="login.php" class="link-secondary text-decoration-none"">¿Ya tienes una cuenta? Inicia sesión aquí</a>
-                    </div>
-                </form>
-            `;
-        } else if (formType === "forgot_password") {
-            document.getElementById('form-container').innerHTML = `
-                <h2 class="text-center login-title mb-4 text-primary mt-5">Recuperar Contraseña</h2>
-                <form action="forgot_password_process.php" method="POST">
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Correo Electrónico</label>
-                        <input type="email" name="email" class="form-control" id="email" placeholder="Ingrese su correo">
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100 mb-3">Enviar Correo</button>
-                    <div class="text-center mt-2">
-                        <a href="login.php" class="link-secondary text-decoration-none"">¿Ya tienes una cuenta? Inicia sesión aquí</a>
-                    </div>
-                </form>
-            `;
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const formType = urlParams.get('form');
-        if (formType) {
-            mostrarFormulario(formType);
-        }
-    });function mostrarToast(titulo, mensaje, tipo) {
+function mostrarToast(titulo, mensaje, tipo) {
             let icon = '';
             let alertClass = '';
 

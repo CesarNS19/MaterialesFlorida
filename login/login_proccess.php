@@ -35,6 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['apellido_paterno'] = $row['apellido_paterno'];
             $_SESSION['apellido_materno'] = $row['apellido_materno'];
             $_SESSION['perfil'] = $row['perfil_nombre'];
+            $_SESSION['last_activity'] = time();
+            $_SESSION['expire_time'] = 50000;
 
             switch ($row['perfil_nombre']) {
                 case 'Administrador':
