@@ -2,7 +2,7 @@
 session_start();
 require '../../mysql/connection.php';
 require 'slidebar.php';
-$title = "La Florida ┃ Administrar Productos";
+$title = "La Florida ┃ Productos";
 
 $searchQuery = "";
 if (isset($_GET['search']) && !empty($_GET['search'])) {

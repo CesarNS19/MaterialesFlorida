@@ -2,7 +2,7 @@
 session_start();
 require '../../mysql/connection.php';
 require 'slidebar.php';
-$title = "La Florida ┃ Administrar Marcas";
+$title = "La Florida ┃ Marcas";
 ?>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
