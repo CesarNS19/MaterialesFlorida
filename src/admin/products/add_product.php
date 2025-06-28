@@ -1,6 +1,7 @@
 <?php
 session_start();
 require '../../../mysql/connection.php';
+date_default_timezone_set('America/Mexico_City');
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id_unidad_medida = $_POST["id_unidad_medida"];
@@ -9,7 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $precio = $_POST['precio'];
     $stock = $_POST['stock'];
     $ubicacion = $_POST['ubicacion'];
-    $fecha_ingreso = $_POST['fecha_ingreso'];
+    $fecha_ingreso = date('Y-m-d');
     $estado = 'activo';
 
     if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === UPLOAD_ERR_OK) {
@@ -55,3 +56,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     header("Location: ../products.php");
     exit();
 }
+?>

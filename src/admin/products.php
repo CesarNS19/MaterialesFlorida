@@ -81,10 +81,7 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                         <label>Ubicación</label>
                         <input type="text" name="ubicacion" class="form-control" required>
                     </div>
-                    <div class="form-group mb-3">
-                        <label>Fecha de Ingreso</label>
-                        <input type="date" name="fecha_ingreso" class="form-control" required>
-                    </div>
+
                         <div class="form-group mb-3">
                         <input type="file" name="imagen" class="form-control" placeholder="Imágen del producto">
                     </div>
@@ -157,10 +154,6 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                         <label for="edit_ubicacion">Ubicación</label>
                         <input type="text" name="ubicacion" id="edit_ubicacion" class="form-control" required>
                     </div>
-                    <div class="form-group mb-3">
-                        <label for="edit_fecha_ingreso">Fecha de Ingreso</label>
-                        <input type="date" name="fecha_ingreso" id="edit_fecha_ingreso" class="form-control" required>
-                    </div>
 
                     <div class="form-group mb-3">
                         <label>Imágen Actual</label>
@@ -221,8 +214,9 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                     <th>Precio</th>
                     <th>Existencia</th>
                     <th>Fecha Ingreso</th>
-                    <th>Imagen</th>
+                    <th>Ubicación</th>
                     <th>Estado</th>
+                    <th>Imagen</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -239,8 +233,9 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                         echo "<td class='text-success fw-bold'>$" . htmlspecialchars($row['precio']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['stock']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['fecha_ingreso']) . "</td>";
-                        echo "<td><img src='../../img/" . htmlspecialchars($row['imagen']) . "' class='rounded' width='100px' height='60px' alt='Imágen Producto'></td>";
+                        echo "<td>" . htmlspecialchars($row['ubicacion']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['estado']) . "</td>";
+                        echo "<td><img src='../../img/" . htmlspecialchars($row['imagen']) . "' class='rounded' width='100px' height='60px' alt='Imágen Producto'></td>";
                         echo "<td>";
 
                         if ($row['estado'] === 'activo') {
@@ -295,7 +290,6 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
         $('#edit_precio').val(productsData.precio);
         $('#edit_stock').val(productsData.stock);
         $('#edit_ubicacion').val(productsData.ubicacion);
-        $('#edit_fecha_ingreso').val(productsData.fecha_ingreso);
         $('#edit_estado').val(productsData.estado);
         $('#current_image').attr('src', '../../img/' + productsData.imagen);
         $('#edit_imagen_actual').val(productsData.imagen);
