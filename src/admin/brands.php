@@ -5,27 +5,6 @@ require 'slidebar.php';
 $title = "La Florida ┃ Administrar Marcas";
 ?>
 
-<style>
-    .custom-orange-text {
-            color: #ff8c00 !important;
-        }
-
-        .bg-custom-orange {
-            background-color: #ff8c00 !important;
-        }
-
-        .custom-orange-btn {
-            background-color: #ff8c00 !important;
-            border-color: #ff8c00 !important;
-            color: white;
-        }
-
-        .custom-orange-btn:hover {
-            background-color: #e67600 !important;
-            border-color: # !important;
-        }
-</style>
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

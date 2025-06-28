@@ -1,0 +1,18 @@
+
+    .custom-orange-text {
+            color: #ff8c00 !important;
+        }
+
+        .bg-custom-orange {
+            background-color: #ff8c00 !important;
+        }
+
+        .custom-orange-btn {
+            background-color: #ff8c00 !important;
+            border-color: #ff8c00 !important;
+            color: white;
+        }
+
+        .custom-orange-btn:hover {
+            background-color: #e67600 !important;
+        }

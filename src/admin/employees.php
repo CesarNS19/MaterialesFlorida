@@ -16,7 +16,7 @@ $title = "Muebleria ┃ Admin Employees";
     <div class="modal fade" id="addEmployeesModal" tabindex="-1" role="dialog" aria-labelledby="addEmployeesModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-custom-orange text-white">
                 <h5 class="modal-title" id="addEmployeesModalLabel">Add Employee</h5>
             </div>
             <form action="employees/add_employee.php" method="POST">
@@ -44,7 +44,7 @@ $title = "Muebleria ┃ Admin Employees";
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="submit" class="btn btn-primary">Agregar Empleado</button>
+                    <button type="submit" class="btn custom-orange-btn text-white">Agregar Empleado</button>
                 </div>
             </form>
         </div>
@@ -55,7 +55,7 @@ $title = "Muebleria ┃ Admin Employees";
 <div class="modal fade" id="editEmployeeModal" tabindex="-1" role="dialog" aria-labelledby="editEmployeeModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-custom-orange text-white">
                 <h5 class="modal-title" id="editEmployeeLabel">Editar Empleado</h5>
             </div>
             <form action="employees/edit_employee.php" method="POST">
@@ -85,7 +85,7 @@ $title = "Muebleria ┃ Admin Employees";
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="submit" class="btn custom-orange-btn text-white">Guardar Cambios</button>
                 </div>
             </form>
         </div>
@@ -101,7 +101,7 @@ $title = "Muebleria ┃ Admin Employees";
       </div>
       <form action="employees/delete_employee.php" method="POST">
       <div class="modal-body">
-      <input type="hidden" name="id_empleado" id="delete_id_empleado">
+      <input type="hidden" name="id_usuario" id="delete_id_usuario">
         <p>¿Estás seguro de que deseas eliminar al empleado?, Esta acción no se puede deshacer.</p>
       </div>
       <div class="modal-footer">
@@ -115,8 +115,8 @@ $title = "Muebleria ┃ Admin Employees";
 
 <div class="container-fluid d-flex">
     <main class="flex-fill p-4 overflow-auto" id="main-content">
-    <h2 class="fw-bold text-primary text-center">Administrar Empleados</h2>
-    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addEmployeesModal" style="float: right; margin: 10px;">
+    <h2 class="fw-bold custom-orange-text text-center">Administrar Empleados</h2>
+    <button class="btn custom-orange-btn text-white" data-bs-toggle="modal" data-bs-target="#addEmployeesModal" style="float: right; margin: 10px;">
             Agregar Empleado
         </button>
     <div class="table-responsive">
@@ -188,7 +188,7 @@ $title = "Muebleria ┃ Admin Employees";
     }
 
     function openDeleteModal(Data) {
-        $('#delete_id_empleado').val(Data.id_empleado);
+        $('#delete_id_usuario').val(Data.id_usuario);
         $('#deleteEmployeeModal').modal('show');
     }
 

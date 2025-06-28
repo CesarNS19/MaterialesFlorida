@@ -2,10 +2,10 @@
 require '../../../mysql/connection.php';
 session_start();
 
-if (isset($_POST['id_empleado'])) {
-    $id = intval($_POST['id_empleado']);
+if (isset($_POST['id_usuario'])) {
+    $id = intval($_POST['id_usuario']);
 
-    $sql = "DELETE FROM empleados WHERE id_empleado = ?";
+    $sql = "DELETE FROM usuarios WHERE id_usuario = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
 

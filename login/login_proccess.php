@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $row = $result->fetch_assoc();
 
         if (password_verify($password, $row['contrasena'])) {
-            if (strtolower($row['estatus']) === 'Inactivo') {
+            if (strtolower($row['estatus']) === 'inactivo') {
                 $_SESSION['status_message'] = "Tu cuenta está inactiva. Contacta al administrador.";
                 $_SESSION['status_type'] = "warning";
                 header("Location: login.php");

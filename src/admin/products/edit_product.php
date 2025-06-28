@@ -4,60 +4,59 @@ session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id_producto = $_POST['id_producto'];
-    $id_categoria = $_POST['id_categoria'];
-    $id_marca = $_POST['id_marca'];
+    $id_unidad_medida = $_POST["id_unidad_medida"];
+    $id_marca = $_POST["id_marca"];
     $nombre = $_POST['nombre'];
-    $descripcion = $_POST['descripcion'];
     $precio = $_POST['precio'];
     $stock = $_POST['stock'];
-    $color = $_POST['color'];
+    $ubicacion = $_POST['ubicacion'];
+    $fecha_ingreso = $_POST['fecha_ingreso'];
 
-    $target_dir = "../../../img/";
+    $imagen_actual = $_POST['imagen_actual'] ?? '';
+    $imagen_ruta = $imagen_actual;
 
-    $imagen_ruta = null;
-
-    if (isset($_FILES['imagen_producto']) && $_FILES['imagen_producto']['error'] == 0) {
+    if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] == UPLOAD_ERR_OK) {
+        $target_dir = "../../../img/";
         if (!is_dir($target_dir)) {
             mkdir($target_dir, 0755, true);
         }
 
-        $target_file = $target_dir . basename($_FILES["imagen_producto"]["name"]);
+        $filename = basename($_FILES["imagen"]["name"]);
+        $target_file = $target_dir . $filename;
         $imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-        $check = getimagesize($_FILES["imagen_producto"]["tmp_name"]);
+        $check = getimagesize($_FILES["imagen"]["tmp_name"]);
         if ($check !== false) {
-            if (move_uploaded_file($_FILES["imagen_producto"]["tmp_name"], $target_file)) {
-                $imagen_ruta = $target_file;
+            if (move_uploaded_file($_FILES["imagen"]["tmp_name"], $target_file)) {
+                $imagen_ruta = $filename;
             } else {
-                $_SESSION['status_message'] = "Error al subir la imágen";
+                $_SESSION['status_message'] = "Error al subir la imagen";
                 $_SESSION['status_type'] = "error";
                 header("Location: ../products.php");
                 exit();
             }
         } else {
-            $_SESSION['status_message'] = "El archivo no es una imágen válida";
+            $_SESSION['status_message'] = "El archivo no es una imagen válida";
             $_SESSION['status_type'] = "warning";
             header("Location: ../products.php");
             exit();
         }
     }
 
-    if ($imagen_ruta) {
-        $sql = "UPDATE productos SET id_categoria='$id_categoria', id_marca='$id_marca', nombre='$nombre', descripcion='$descripcion', precio='$precio', stock='$stock', color='$color', imagen='$imagen_ruta' WHERE id_producto='$id_producto'";
-    } else {
-        $sql = "UPDATE productos SET id_categoria='$id_categoria', id_marca='$id_marca', nombre='$nombre', descripcion='$descripcion', precio='$precio', stock='$stock', color='$color'  WHERE id_producto='$id_producto'";
-    }
+    $sql = "UPDATE productos SET id_unidad_medida = ?, id_marca = ?, nombre = ?, precio = ?, stock = ?, ubicacion = ?, fecha_ingreso = ?, imagen = ? WHERE id_producto = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iisdssssi", $id_unidad_medida, $id_marca, $nombre, $precio, $stock, $ubicacion, $fecha_ingreso, $imagen_ruta, $id_producto);
 
-    if ($conn->query($sql) === TRUE) {
+    if ($stmt->execute()) {
         $_SESSION['status_message'] = "Producto actualizado exitosamente";
         $_SESSION['status_type'] = "success";
     } else {
-        $_SESSION['status_message'] = "Error al actualizar el producto";
+        $_SESSION['status_message'] = "Error al actualizar el producto: " . $stmt->error;
         $_SESSION['status_type'] = "danger";
     }
 
+    $stmt->close();
     header("Location: ../products.php");
     exit();
 }
-
 ?>

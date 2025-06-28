@@ -10,32 +10,14 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     $searchQuery = " WHERE p.nombre LIKE '%" . $conn->real_escape_string($searchTerm) . "%' ";
 }
 
-$sql = "SELECT p.id_producto, m.nombre AS marca, p.nombre, p.precio, p.imagen, p.stock
+$sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
+               p.id_marca, m.nombre AS marca, p.nombre, 
+               p.precio, p.stock, p.ubicacion, p.fecha_ingreso, 
+               p.estado, p.imagen
         FROM productos p
-        JOIN marcas m ON p.id_marca = m.id_marca" . $searchQuery;
-$result = $conn->query($sql);
+        JOIN marcas m ON p.id_marca = m.id_marca
+        JOIN unidades_medida u ON p.id_unidad_medida = u.id_unidad_medida" . $searchQuery;
 ?>
-
-<style>
-    .custom-orange-text {
-            color: #ff8c00 !important;
-        }
-
-        .bg-custom-orange {
-            background-color: #ff8c00 !important;
-        }
-
-        .custom-orange-btn {
-            background-color: #ff8c00 !important;
-            border-color: #ff8c00 !important;
-            color: white;
-        }
-
-        .custom-orange-btn:hover {
-            background-color: #e67600 !important;
-            border-color: # !important;
-        }
-</style>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -88,10 +70,6 @@ $result = $conn->query($sql);
                         <input type="text" name="nombre" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
-                        <label for="">Descripción</label>
-                        <textarea name="descripcion" class="form-control" required></textarea>
-                    </div>
-                    <div class="form-group mb-3">
                         <label for="">Precio</label>
                         <input type="number" name="precio" class="form-control" required>
                     </div>
@@ -100,11 +78,15 @@ $result = $conn->query($sql);
                         <input type="number" name="stock" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
-                        <label for="">Color</label>
-                        <input type="text" name="color" class="form-control" required>
+                        <label>Ubicación</label>
+                        <input type="text" name="ubicacion" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
-                        <input type="file" name="imagen_producto" class="form-control" placeholder="Imágen del producto">
+                        <label>Fecha de Ingreso</label>
+                        <input type="date" name="fecha_ingreso" class="form-control" required>
+                    </div>
+                        <div class="form-group mb-3">
+                        <input type="file" name="imagen" class="form-control" placeholder="Imágen del producto">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -126,16 +108,17 @@ $result = $conn->query($sql);
             <form action="products/edit_product.php" method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
                     <input type="hidden" name="id_producto" id="edit_id_producto">
-                    
+                    <input type="hidden" name="imagen_actual" id="edit_imagen_actual">
+
                     <div class="form-group mb-3">
-                        <label for="edit_unidad">Categoría</label>
+                        <label for="edit_unidad">Unidad de Medida</label>
                         <select name="id_unidad_medida" id="edit_unidad" class="form-control" required>
                             <?php
                             $unidades_sql = "SELECT * FROM unidades_medida";
                             $unidades_result = $conn->query($unidades_sql);
 
                             while ($unidad = $unidades_result->fetch_assoc()) {
-                                echo "<option value='" . $unidad['id_unidad_medida'] . "'>" . htmlspecialchars($categoria['nombre']) . "</option>";
+                                echo "<option value='" . $unidad['id_unidad_medida'] . "'>" . htmlspecialchars($unidad['nombre']) . "</option>";
                             }
                             ?>
                         </select>
@@ -161,11 +144,6 @@ $result = $conn->query($sql);
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="edit_descripcion">Descripción del producto</label>
-                        <textarea name="descripcion" class="form-control" id="edit_descripcion" required></textarea>
-                    </div>
-
-                    <div class="form-group mb-3">
                         <label for="edit_precio">Precio del Producto</label>
                         <input type="number" name="precio" id="edit_precio" class="form-control" required>
                     </div>
@@ -176,8 +154,12 @@ $result = $conn->query($sql);
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="edit_color">Color</label>
-                        <input type="text" name="color" id="edit_color" class="form-control" required>
+                        <label for="edit_ubicacion">Ubicación</label>
+                        <input type="text" name="ubicacion" id="edit_ubicacion" class="form-control" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="edit_fecha_ingreso">Fecha de Ingreso</label>
+                        <input type="date" name="fecha_ingreso" id="edit_fecha_ingreso" class="form-control" required>
                     </div>
 
                     <div class="form-group mb-3">
@@ -189,7 +171,7 @@ $result = $conn->query($sql);
 
                     <div class="form-group mb-3">
                         <label for="edit_imagen">Actualizar Imágen del Producto</label>
-                        <input type="file" name="imagen_producto" id="edit_imagen" class="form-control">
+                        <input type="file" name="imagen" id="edit_imagen" class="form-control">
                     </div>
                 </div>
 
@@ -233,12 +215,14 @@ $result = $conn->query($sql);
         <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
             <thead class="bg-primary text-white">
                 <tr>
+                     <th>Marca</th>
                     <th class="text-start">Producto</th>
-                    <th class="text-start">Descripción</th>
+                    <th>Unidad de Medida</th>
                     <th>Precio</th>
-                    <th>Stock</th>
-                    <th>Marca</th>
+                    <th>Existencia</th>
+                    <th>Fecha Ingreso</th>
                     <th>Imagen</th>
+                    <th>Estado</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -249,24 +233,37 @@ $result = $conn->query($sql);
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
                         echo "<tr>";
+                        echo "<td>" . htmlspecialchars($row['marca']) . "</td>";
                         echo "<td class='text-start'>" . htmlspecialchars($row['nombre']) . "</td>";
-                        echo "<td class='text-start text-muted'>" . htmlspecialchars($row['descripcion']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['unidad_medida']) . "</td>";
                         echo "<td class='text-success fw-bold'>$" . htmlspecialchars($row['precio']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['stock']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['marca']) . "</td>";
-                        echo "<td><img src='img/" . htmlspecialchars($row['imagen']) . "' class='rounded' width='100px' height='60px' alt='Imágen Producto'></td>";
-                        echo "<td>
-                            <button class='btn btn-sm btn-outline-primary me-2 rounded-pill shadow-sm' onclick='openEditModal(" . json_encode($row) . ")'>
+                        echo "<td>" . htmlspecialchars($row['fecha_ingreso']) . "</td>";
+                        echo "<td><img src='../../img/" . htmlspecialchars($row['imagen']) . "' class='rounded' width='100px' height='60px' alt='Imágen Producto'></td>";
+                        echo "<td>" . htmlspecialchars($row['estado']) . "</td>";
+                        echo "<td>";
+
+                        if ($row['estado'] === 'activo') {
+                            echo "<a href='products/status_product.php?id=" . $row['id_producto'] . "&estatus=inactivo' class='btn btn-warning btn-sm me-2 rounded-pill shadow-sm'>
+                                    <i class='fas fa-ban'></i> Desactivar
+                                  </a>";
+                        } else {
+                            echo "<a href='products/status_product.php?id=" . $row['id_producto'] . "&estatus=activo' class='btn btn-success btn-sm me-2 rounded-pill shadow-sm'>
+                                    <i class='fas fa-check-circle'></i> Activar
+                                  </a>";
+                        }
+
+                        echo "<button class='btn btn-sm btn-outline-primary me-2 rounded-pill shadow-sm' onclick='openEditModal(" . json_encode($row) . ")'>
                                 <i class='fas fa-edit'></i> Editar
-                            </button>
-                            <button class='btn btn-sm btn-outline-danger me-2 rounded-pill shadow-sm' onclick='openDeleteModal(" . json_encode($row) . ")'>
+                              </button>
+                              <button class='btn btn-sm btn-outline-danger me-2 rounded-pill shadow-sm' onclick='openDeleteModal(" . json_encode($row) . ")'>
                                 <i class='fas fa-trash-alt'></i> Eliminar
                               </button>
                         </td>";
                         echo "</tr>";
                     }
                 } else {
-                    echo "<tr><td colspan='7' class='text-center text-muted'>No se encontraron productos</td></tr>";
+                    echo "<tr><td colspan='6' class='text-center text-muted'>No hay productos disponibles</td></tr>";
                 }
                 ?>
             </tbody>
@@ -292,14 +289,17 @@ $result = $conn->query($sql);
 
     function openEditModal(productsData) {
         $('#edit_id_producto').val(productsData.id_producto);
-        $('#edit_id_categoria').val(productsData.id_categoria);
-        $('#edit_id_marca').val(productsData.id_marca);
-        $('#edit_nombre').val(productsData.nombre);
-        $('#edit_descripcion').val(productsData.descripcion);  
+        $('#edit_unidad').val(productsData.id_unidad_medida);
+        $('#edit_marca').val(productsData.id_marca);
+        $('#edit_nombre').val(productsData.nombre); 
         $('#edit_precio').val(productsData.precio);
         $('#edit_stock').val(productsData.stock);
-        $('#edit_color').val(productsData.color);
-        $('#current_image').attr('src', 'img/' + productsData.imagen);
+        $('#edit_ubicacion').val(productsData.ubicacion);
+        $('#edit_fecha_ingreso').val(productsData.fecha_ingreso);
+        $('#edit_estado').val(productsData.estado);
+        $('#current_image').attr('src', '../../img/' + productsData.imagen);
+        $('#edit_imagen_actual').val(productsData.imagen);
+
         $('#editProductsModal').modal('show');
     }
 
