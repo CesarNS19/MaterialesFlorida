@@ -164,7 +164,23 @@ $_SESSION['last_activity'] = time();
                     <i class="fas fa-users"></i>
                     <span>Empleados</span></a>
             </li>
-            <hr class="sidebar-divider d-none d-md-block">
+            <hr class="sidebar-divider">
+            <div class="sidebar-heading">
+                Compras
+            </div>
+            <li class="nav-item">
+                <a class="nav-link" href="shopping.php">
+                    <i class="fas fa-basket-shopping"></i>
+                    <span>Compras</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="suppliers.php">
+                    <i class="fas fa-truck"></i> 
+                    <span>Proveedores</span>
+                </a>
+            </li>
         </ul>
 
         <div id="content-wrapper" class="d-flex flex-column">
