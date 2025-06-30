@@ -13,7 +13,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
  $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.email, p.estatus AS estado, p.nombre AS perfil, p.id_perfil
                 FROM usuarios u
                 JOIN perfil p ON u.id_perfil = p.id_perfil
-                WHERE p.nombre = 'Empleado'". $searchQuery;
+                WHERE p.nombre = 'Cliente'". $searchQuery;
 ?>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -24,16 +24,16 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 
 <div id="Alert" class="container"></div>
 
-    <div class="modal fade" id="addEmployeesModal" tabindex="-1" role="dialog" aria-labelledby="addEmployeesModalLabel" aria-hidden="true">
+    <div class="modal fade" id="addCustomersModal" tabindex="-1" role="dialog" aria-labelledby="addCustomersModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header bg-custom-orange text-white">
-                <h5 class="modal-title" id="addEmployeesModalLabel">Agregar Empleado</h5>
+                <h5 class="modal-title" id="addCustomersModalLabel">Agregar Cliente</h5>
             </div>
-            <form action="employees/add_employee.php" method="POST">
+            <form action="customers/add_customer.php" method="POST">
                 <div class="modal-body">
                     <div class="form-group mb-3">
-                        <label>Nombre del Empleado</label>
+                        <label>Nombre del Cliente</label>
                         <input type="text" name="nombre" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
@@ -62,19 +62,19 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     </div>
 </div>
 
-<!-- Modal para editar empleado -->
-<div class="modal fade" id="editEmployeeModal" tabindex="-1" role="dialog" aria-labelledby="editEmployeeModalLabel" aria-hidden="true">
+<!-- Modal para editar clientes -->
+<div class="modal fade" id="editCustomerModal" tabindex="-1" role="dialog" aria-labelledby="editCustomerModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header bg-custom-orange text-white">
-                <h5 class="modal-title" id="editEmployeeLabel">Editar Empleado</h5>
+                <h5 class="modal-title" id="editCustomerLabel">Editar Cliente</h5>
             </div>
-            <form action="employees/edit_employee.php" method="POST">
+            <form action="customers/edit_customer.php" method="POST">
                 <div class="modal-body">
                     <input type="hidden" name="id_usuario" id="edit_id_usuario">
                     
                     <div class="form-group mb-3">
-                        <label for="edit_nombre">Nombre del Empleado</label>
+                        <label for="edit_nombre">Nombre del Cliente</label>
                         <input type="text" name="nombre" id="edit_nombre" class="form-control" required>
                     </div>
                     
@@ -103,17 +103,17 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     </div>
 </div>
 
-<!-- Modal para eliminar empleados -->
-<div class="modal fade" id="deleteEmployeeModal" tabindex="-1" aria-labelledby="deleteEmployeeModalLabel" aria-hidden="true">
+<!-- Modal para eliminar clientes -->
+<div class="modal fade" id="deleteCustomerModal" tabindex="-1" aria-labelledby="deleteCustomerModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="deleteEmployeeModalLabel">Confirmar Eliminación</h5>
+        <h5 class="modal-title" id="deleteCustomerModalLabel">Confirmar Eliminación</h5>
       </div>
-      <form action="employees/delete_employee.php" method="POST">
+      <form action="customers/delete_customer.php" method="POST">
       <div class="modal-body">
       <input type="hidden" name="id_usuario" id="delete_id_usuario">
-        <p>¿Estás seguro de que deseas eliminar al empleado?, Esta acción no se puede deshacer.</p>
+        <p>¿Estás seguro de que deseas eliminar al cliente?, Esta acción no se puede deshacer.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -126,22 +126,22 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 
 <div class="container-fluid d-flex">
     <main class="flex-fill p-4 overflow-auto" id="main-content">
-    <h2 class="fw-bold custom-orange-text text-center">Administrar Empleados</h2>
-    <button class="btn custom-orange-btn text-white" data-bs-toggle="modal" data-bs-target="#addEmployeesModal" style="float: right; margin: 10px;">
-            Agregar Empleado
+    <h2 class="fw-bold custom-orange-text text-center">Administrar Clientes</h2>
+    <button class="btn custom-orange-btn text-white" data-bs-toggle="modal" data-bs-target="#addCustomersModal" style="float: right; margin: 10px;">
+            Agregar Cliente
         </button>
     <div class="table-responsive">
         <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
             <thead class="bg-primary text-white">
                 <tr>
-                    <th>Empleado</th>
+                    <th>Cliente</th>
                     <th>Email</th>
                     <th>Perfil</th>
                     <th>Estatus</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody id="employees-container">
+            <tbody id="customers-container">
                 <?php
                 $result = $conn->query($sql);
 
@@ -156,11 +156,11 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                         echo "<td>";
                     
                         if ($row['estado'] === 'activo') {
-                            echo "<a href='employees/status_employee.php?id=" . $row['id_perfil'] . "&estatus=inactivo' class='btn btn-warning btn-sm me-2 rounded-pill shadow-sm'>
+                            echo "<a href='customers/status_customer.php?id=" . $row['id_perfil'] . "&estatus=inactivo' class='btn btn-warning btn-sm me-2 rounded-pill shadow-sm'>
                                     <i class='fas fa-ban'></i> Desactivar
                                   </a>";
                         } else {
-                            echo "<a href='employees/status_employee.php?id=" . $row['id_perfil'] . "&estatus=activo' class='btn btn-success btn-sm me-2 rounded-pill shadow-sm'>
+                            echo "<a href='customers/status_customer.php?id=" . $row['id_perfil'] . "&estatus=activo' class='btn btn-success btn-sm me-2 rounded-pill shadow-sm'>
                                     <i class='fas fa-check-circle'></i> Activar
                                   </a>";
                         }
@@ -175,7 +175,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                         echo "</tr>";
                     }
                 } else {
-                    echo "<tr><td colspan='6' class='text-center text-muted'>No hay empleados disponibles</td></tr>";
+                    echo "<tr><td colspan='6' class='text-center text-muted'>No hay clientes disponibles</td></tr>";
                 }
                 ?>
             </tbody>
@@ -190,11 +190,11 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
             let searchTerm = $(this).val();
             
             $.ajax({
-                url: "employees/search_employee.php",
+                url: "customers/search_customer.php",
                 type: "GET",
                 data: { search: searchTerm },
                 success: function(response) {
-                    $('#employees-container').html(response);
+                    $('#customers-container').html(response);
                 }
             });
         });
@@ -206,12 +206,12 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         $('#edit_apellido_paterno').val(employeesData.apellido_paterno);
         $('#edit_apellido_materno').val(employeesData.apellido_materno);
         $('#edit_email').val(employeesData.email);
-        $('#editEmployeeModal').modal('show');
+        $('#editCustomerModal').modal('show');
     }
 
     function openDeleteModal(Data) {
         $('#delete_id_usuario').val(Data.id_usuario);
-        $('#deleteEmployeeModal').modal('show');
+        $('#deleteCustomerModal').modal('show');
     }
 
     function mostrarToast(titulo, mensaje, tipo) {
