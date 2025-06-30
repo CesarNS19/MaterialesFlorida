@@ -3,6 +3,17 @@ session_start();
 require '../../mysql/connection.php';
 require 'slidebar.php';
 $title = "La Florida ┃ Empleados";
+
+$searchQuery = "";
+if (isset($_GET['search']) && !empty($_GET['search'])) {
+    $searchTerm = $_GET['search'];
+    $searchQuery = " WHERE p.nombre LIKE '%" . $conn->real_escape_string($searchTerm) . "%' ";
+}
+
+ $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.email, p.estatus AS estado, p.nombre AS perfil, p.id_perfil
+                FROM usuarios u
+                JOIN perfil p ON u.id_perfil = p.id_perfil
+                WHERE p.nombre = 'Empleado'". $searchQuery;
 ?>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -130,12 +141,8 @@ $title = "La Florida ┃ Empleados";
                     <th>Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="employees-container">
                 <?php
-                $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.email, p.estatus AS estado, p.nombre AS perfil, p.id_perfil
-                FROM usuarios u
-                JOIN perfil p ON u.id_perfil = p.id_perfil
-                WHERE p.nombre = 'Empleado'";
                 $result = $conn->query($sql);
 
                 if ($result->num_rows > 0) {
@@ -177,6 +184,21 @@ $title = "La Florida ┃ Empleados";
 </div>
 
 <script>
+
+    $(document).ready(function() {
+        $('#search').on('input', function() {
+            let searchTerm = $(this).val();
+            
+            $.ajax({
+                url: "employees/search_employee.php",
+                type: "GET",
+                data: { search: searchTerm },
+                success: function(response) {
+                    $('#employees-container').html(response);
+                }
+            });
+        });
+    });
 
     function openEditModal(employeesData) {
         $('#edit_id_usuario').val(employeesData.id_usuario);
