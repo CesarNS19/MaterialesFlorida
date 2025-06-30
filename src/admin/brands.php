@@ -3,6 +3,14 @@ session_start();
 require '../../mysql/connection.php';
 require 'slidebar.php';
 $title = "La Florida ┃ Marcas";
+
+$searchQuery = "";
+if (isset($_GET['search']) && !empty($_GET['search'])) {
+    $searchTerm = $_GET['search'];
+    $searchQuery = " WHERE p.nombre LIKE '%" . $conn->real_escape_string($searchTerm) . "%' ";
+}
+
+$sql = "SELECT * FROM marcas". $searchQuery;
 ?>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -107,9 +115,8 @@ $title = "La Florida ┃ Marcas";
                     <th class="text-middle">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="brands-container">
                 <?php
-                $sql = "SELECT * FROM marcas";
                 $result = $conn->query($sql);
 
                 if ($result->num_rows > 0) {
@@ -137,6 +144,21 @@ $title = "La Florida ┃ Marcas";
 </div>
 
 <script>
+
+    $(document).ready(function() {
+        $('#search').on('input', function() {
+            let searchTerm = $(this).val();
+            
+            $.ajax({
+                url: "brands/search_brands.php",
+                type: "GET",
+                data: { search: searchTerm },
+                success: function(response) {
+                    $('#brands-container').html(response);
+                }
+            });
+        });
+    });
 
     function openEditModal(categoriesData) {
         $('#edit_id_marca').val(categoriesData.id_marca);
