@@ -10,3 +10,6 @@ $title = "La Florida ┃ Compras";
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <title><?php echo $title; ?></title>
+<div class="container">
+    <h1>Compras</h1>
+</div>
