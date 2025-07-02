@@ -89,21 +89,7 @@ $_SESSION['last_activity'] = time();
             <div class="sidebar-heading">
                 Productos
             </div>
-            <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-                aria-expanded="true" aria-controls="collapseTwo">
-                <i class="fas fa-layer-group"></i>
-                <span>Categorías</span>
-            </a>
-            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <a class="collapse-item" href="categories.php">
-                        <i class="fas fa-layer-group"></i>Categorias
-                    </a>
-                </div>
-            </div>
-        </li>
-
+            
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
                 aria-expanded="true" aria-controls="collapsePages">
