@@ -71,7 +71,7 @@ $_SESSION['last_activity'] = time();
 <body id="page-top">
 
         <ul class="navbar-nav sidebar sidebar-dark accordion custom-orange-bg" id="accordionSidebar">
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index_admin.php">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index_employee.php">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-truck-loading"></i>
                 </div>
@@ -119,11 +119,6 @@ $_SESSION['last_activity'] = time();
             <div class="sidebar-heading">
                 Usuarios
             </div>
-            <li class="nav-item">
-                <a class="nav-link" href="employees.php">
-                    <i class="fas fa-users"></i>
-                    <span>Empleados</span></a>
-            </li>
             <li class="nav-item">
                 <a class="nav-link" href="customers.php">
                     <i class="fas fa-user"></i>
