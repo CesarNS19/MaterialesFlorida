@@ -6,13 +6,14 @@ $title = "La Florida ┃ Empleados";
 
 $searchQuery = "";
 if (isset($_GET['search']) && !empty($_GET['search'])) {
-    $searchTerm = $_GET['search'];
-    $searchQuery = " WHERE p.nombre LIKE '%" . $conn->real_escape_string($searchTerm) . "%' ";
+    $searchTerm = $conn->real_escape_string($_GET['search']);
+    $searchQuery = " AND (u.nombre LIKE '%" . $searchTerm . "%' OR u.email LIKE '%" . $searchTerm . "%') ";
 }
 
- $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.email, p.estatus AS estado, p.nombre AS perfil, p.id_perfil
+ $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.email, p.estatus AS estado, p.nombre AS perfil, p.id_perfil, u.id_direccion, d.ciudad
                 FROM usuarios u
                 JOIN perfil p ON u.id_perfil = p.id_perfil
+                JOIN direcciones d ON u.id_direccion = d.id_direccion
                 WHERE p.nombre = 'Empleado'". $searchQuery;
 ?>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -45,12 +46,29 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                         <input type="text" name="apellido_materno" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
+                        <label for="id_direccion">Direccion</label>
+                        <select name="id_direccion" id="id_direccion" class="form-control" required>
+                            <option value="">Seleccione una direccción</option>
+                            <?php
+                            $direcciones_sql = "SELECT * FROM direcciones";
+                            $direcciones_result = $conn->query($direcciones_sql);
+                            while ($direccion = $direcciones_result->fetch_assoc()) {
+                                echo "<option value='" . $direccion['id_direccion'] . "'>" . htmlspecialchars($direccion['ciudad']) . "</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3">
                         <label>Email</label>
                         <input type="email" name="email" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
-                        <label>Password</label>
+                        <label>Contraseña</label>
                         <input type="password" name="contrasena" class="form-control" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Confirmar Contraseña</label>
+                        <input type="password" name="confirmar_contrasena" class="form-control" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -91,6 +109,19 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                     <div class="form-group mb-3">
                         <label for="edit_email">Email</label>
                         <input type="email" name="email" id="edit_email" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label for="edit_id_direccion">Dirección</label>
+                        <select name="id_direccion" id="edit_id_direccion" class="form-control" required>
+                            <?php
+                            $direcciones_sql = "SELECT * FROM direcciones";
+                            $direcciones_result = $conn->query($direcciones_sql);
+                            while ($direccion = $direcciones_result->fetch_assoc()) {
+                                echo "<option value='" . $direccion['id_direccion'] . "'>" . htmlspecialchars($direccion['ciudad']) . "</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
                     
                 </div>
@@ -135,6 +166,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
             <thead class="bg-primary text-white">
                 <tr>
                     <th>Empleado</th>
+                    <th>Direccion</th>
                     <th>Email</th>
                     <th>Perfil</th>
                     <th>Estatus</th>
@@ -150,6 +182,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                         $nombre_completo = htmlspecialchars($row['nombre'] . ' ' . $row['apellido_paterno'] . ' ' . $row['apellido_materno']);
                         echo "<tr>";
                         echo "<td>" . $nombre_completo . "</td>";
+                        echo "<td>" . htmlspecialchars($row['ciudad']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['email']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['perfil']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['estado']) . "</td>";
@@ -202,6 +235,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 
     function openEditModal(employeesData) {
         $('#edit_id_usuario').val(employeesData.id_usuario);
+        $('#edit_id_direccion').val(employeesData.id_direccion);
         $('#edit_nombre').val(employeesData.nombre);
         $('#edit_apellido_paterno').val(employeesData.apellido_paterno);
         $('#edit_apellido_materno').val(employeesData.apellido_materno);

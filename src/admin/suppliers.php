@@ -12,7 +12,9 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         producto LIKE '%$searchTerm%'";
 }
 
- $sql = "SELECT * FROM proveedores". $searchQuery;
+ $sql = "SELECT p.nombre, p.producto, p.telefono, p.email, p.fecha_ingreso, p.id_proveedor, p.estatus, d.id_direccion, d.ciudad
+        FROM proveedores p
+        JOIN direcciones d ON p.id_direccion = d.id_direccion". $searchQuery;
 ?>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -48,8 +50,17 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                         <input type="email" name="email" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
-                        <label>Direccion</label>
-                        <input type="text" name="direccion" class="form-control" required>
+                        <label for="id_direccion">Direccion</label>
+                        <select name="id_direccion" id="id_direccion" class="form-control" required>
+                            <option value="">Seleccione una direccción</option>
+                            <?php
+                            $direcciones_sql = "SELECT * FROM direcciones";
+                            $direcciones_result = $conn->query($direcciones_sql);
+                            while ($direccion = $direcciones_result->fetch_assoc()) {
+                                echo "<option value='" . $direccion['id_direccion'] . "'>" . htmlspecialchars($direccion['ciudad']) . "</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -93,8 +104,16 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="edit_direccion">Dirección</label>
-                        <input type="text" name="direccion" id="edit_direccion" class="form-control" required>
+                        <label for="edit_id_direccion">Dirección</label>
+                        <select name="id_direccion" id="edit_id_direccion" class="form-control" required>
+                            <?php
+                            $direcciones_sql = "SELECT * FROM direcciones";
+                            $direcciones_result = $conn->query($direcciones_sql);
+                            while ($direccion = $direcciones_result->fetch_assoc()) {
+                                echo "<option value='" . $direccion['id_direccion'] . "'>" . htmlspecialchars($direccion['ciudad']) . "</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
                     
                 </div>
@@ -159,7 +178,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                         echo "<td>" . htmlspecialchars($row['producto']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['telefono']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['direccion']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['ciudad']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['fecha_ingreso']) . "</td>";
                         echo "<td>";
                     
@@ -210,11 +229,11 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 
     function openEditModal(data) {
         $('#edit_id_proveedor').val(data.id_proveedor);
+        $('#edit_id_direccion').val(data.id_direccion);
         $('#edit_nombre').val(data.nombre);
         $('#edit_producto').val(data.producto);
         $('#edit_telefono').val(data.telefono);
         $('#edit_email').val(data.email);
-        $('#edit_direccion').val(data.direccion);
         $('#editModal').modal('show');
     }
 

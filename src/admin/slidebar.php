@@ -77,61 +77,29 @@ $_SESSION['last_activity'] = time();
                 </div>
                 <div class="sidebar-brand-text mx-3">La Florida</div>
             </a>
-
-            <hr class="sidebar-divider my-0">
-            <li class="nav-item active">
-                <a class="nav-link" href="index_admin.php">
-                    <i class="fas fa-home"></i>
-                    <span>Inicio</span></a>
-            </li>
-
             <hr class="sidebar-divider">
             <div class="sidebar-heading">
                 Productos
             </div>
-              <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-                aria-expanded="true" aria-controls="collapseTwo">
-                <i class="fas fa-layer-group"></i>
-                <span>Categorías</span>
-            </a>
-            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <a class="collapse-item" href="categories.php">
-                        <i class="fas fa-layer-group"></i>Categorias
-                    </a>
-                </div>
-            </div>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePages"
-                aria-expanded="true" aria-controls="collapsePages">
-                <i class="fas fa-globe"></i>
-                <span>Marcas</span>
-            </a>
-            <div id="collapsePages" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <a class="collapse-item" href="brands.php">
-                        <i class="fas fa-globe"></i> Marcas
-                    </a>
-                </div>
-            </div>
-        </li>
+             <li class="nav-item">
+                <a class="nav-link" href="categories.php">
+                    <i class="fas fa-tags"></i>
+                    <span>Categorías</span>
+                </a>
+            </li>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUtilities"
-                    aria-expanded="true" aria-controls="collapseUtilities">
-                    <i class="fas fa-box"></i>
+                <a class="nav-link" href="brands.php">
+                    <i class="fas fa-industry"></i>
+                    <span>Marcas</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="products.php">
+                    <i class="fas fa-box-open"></i>
                     <span>Productos</span>
                 </a>
-                <div id="collapseUtilities" class="collapse" aria-labelledby="headingUtilities"
-                    data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="products.php">
-                            <i class="fas fa-box"></i> Productos
-                        </a>
-                    </div>
-                </div>
             </li>
 
             <hr class="sidebar-divider">
@@ -141,19 +109,12 @@ $_SESSION['last_activity'] = time();
             </div>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapse"
-                    aria-expanded="true" aria-controls="collapse">
-                    <i class="fas fa-dollar-sign"></i>
+                <a class="nav-link" href="employees.php">
+                    <i class="fas fa-cash-register"></i>
                     <span>Ventas</span>
                 </a>
-                <div id="collapse" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="sales.php">
-                            <i class="fas fa-chart-line"></i> Mis Ventas
-                        </a>
-                    </div>
-                </div>
             </li>
+
             <hr class="sidebar-divider">
             <div class="sidebar-heading">
                 Usuarios
@@ -167,6 +128,11 @@ $_SESSION['last_activity'] = time();
                 <a class="nav-link" href="customers.php">
                     <i class="fas fa-user"></i>
                     <span>Clientes</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="addresses.php">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Direcciones</span></a>
             </li>
             <hr class="sidebar-divider">
             <div class="sidebar-heading">

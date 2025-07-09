@@ -3,11 +3,11 @@ require '../../../mysql/connection.php';
 session_start();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $id_direccion = $_POST['id_direccion'];
     $nombre = $_POST['nombre'];
     $apellido_paterno = $_POST['apellido_paterno'];
     $apellido_materno = $_POST['apellido_materno'];
     $email = $_POST['email'];
-    $contrasena = $_POST['contrasena'];
 
     $id_perfil = 3;
 
@@ -21,13 +21,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['status_message'] = "El correo electrónico ya está registrado, intente con otro.";
         $_SESSION['status_type'] = "danger";
     } else {
-        $hashed_password = password_hash($contrasena, PASSWORD_DEFAULT);
 
-        $sql = "INSERT INTO usuarios (id_perfil, nombre, apellido_paterno, apellido_materno, email, contrasena) 
+        $sql = "INSERT INTO usuarios (id_perfil, id_direccion, nombre, apellido_paterno, apellido_materno, email) 
                 VALUES (?, ?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("isssss", $id_perfil, $nombre, $apellido_paterno, $apellido_materno, $email, $hashed_password);
+        $stmt->bind_param("iissss", $id_perfil, $id_direccion, $nombre, $apellido_paterno, $apellido_materno, $email);
 
         if ($stmt->execute()) {
             $_SESSION['status_message'] = "Cliente agregado exitosamente.";

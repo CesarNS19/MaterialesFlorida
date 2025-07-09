@@ -17,7 +17,7 @@ $title = "La Florida ┃ Categorias";
 <div class="modal fade" id="addCategoriesModal" tabindex="-1" role="dialog" aria-labelledby="addCategoriesModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-custom-orange text-white">
                 <h5 class="modal-title" id="addCategoriesModalLabel">Agregar Nueva Categoría</h5>
             </div>
             <form action="categories/add_categories.php" method="POST">
@@ -33,7 +33,7 @@ $title = "La Florida ┃ Categorias";
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="submit" class="btn btn-primary">Agregar Categoría</button>
+                    <button type="submit" class="btn custom-orange-btn text-white">Agregar Categoría</button>
                 </div>
             </form>
         </div>
@@ -63,7 +63,7 @@ $title = "La Florida ┃ Categorias";
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                    <button type="submit" class="btn custom-orange-btn text-white">Guardar Cambios</button>
                 </div>
             </form>
         </div>
@@ -93,8 +93,8 @@ $title = "La Florida ┃ Categorias";
 
 <div class="container-fluid d-flex">
     <main class="flex-fill p-4 overflow-auto" id="main-content">
-        <h2 class="fw-bold text-primary text-center">Administrar Categorías</h2>
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCategoriesModal" style="float: right; margin: 10px;">
+        <h2 class="fw-bold custom-orange-text text-center">Administrar Categorías</h2>
+        <button class="btn custom-orange-btn text-white" data-bs-toggle="modal" data-bs-target="#addCategoriesModal" style="float: right; margin: 10px;">
             Agregar Categoria
         </button>
         <div class="table-responsive">

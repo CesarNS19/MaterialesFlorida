@@ -6,6 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $id_producto = $_POST['id_producto'];
     $id_unidad_medida = $_POST["id_unidad_medida"];
     $id_marca = $_POST["id_marca"];
+    $id_categoria = $_POST["id_categoria"];
     $nombre = $_POST['nombre'];
     $precio = $_POST['precio'];
     $stock = $_POST['stock'];
@@ -42,9 +43,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    $sql = "UPDATE productos SET id_unidad_medida = ?, id_marca = ?, nombre = ?, precio = ?, stock = ?, ubicacion = ?, imagen = ? WHERE id_producto = ?";
+    $sql = "UPDATE productos SET id_unidad_medida = ?, id_marca = ?, id_categoria = ?, nombre = ?, precio = ?, stock = ?, ubicacion = ?, imagen = ? WHERE id_producto = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("iisdsssi", $id_unidad_medida, $id_marca, $nombre, $precio, $stock, $ubicacion, $imagen_ruta, $id_producto);
+    $stmt->bind_param("iiisdsssi", $id_unidad_medida, $id_marca, $id_categoria, $nombre, $precio, $stock, $ubicacion, $imagen_ruta, $id_producto);
 
     if ($stmt->execute()) {
         $_SESSION['status_message'] = "Producto actualizado exitosamente";

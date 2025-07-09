@@ -13,9 +13,10 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                p.id_marca, m.nombre AS marca, p.nombre, 
                p.precio, p.stock, p.ubicacion, p.fecha_ingreso, 
-               p.estado, p.imagen
+               p.estado, p.imagen, c.nombre AS categoria, c.id_categoria
         FROM productos p
         JOIN marcas m ON p.id_marca = m.id_marca
+        JOIN categorias c ON p.id_categoria = c.id_categoria
         JOIN unidades_medida u ON p.id_unidad_medida = u.id_unidad_medida" . $searchQuery;
 ?>
 
@@ -37,55 +38,74 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
             </div>
             <form action="products/add_product.php" method="POST" enctype="multipart/form-data">
                 <div class="modal-body">
-                <div class="form-group mb-3">
-                    <label>Unidad sde Medida</label>
-                    <select name="id_unidad_medida" class="form-control" required>
-                        <option value="">Seleccione una unidad de medida</option>
-                        <?php
-                        $unidades_sql = "SELECT * FROM unidades_medida";
-                        $unidades_result = $conn->query($unidades_sql);
-
-                        while ($unidad = $unidades_result->fetch_assoc()) {
-                            echo "<option value='" . $unidad['id_unidad_medida'] . "'>" . htmlspecialchars($unidad['nombre']) . "</option>";
-                        }
-                        ?>
-                    </select>
-                </div>
-                <div class="form-group mb-3">
-                    <label>Marca</label>
-                    <select name="id_marca" class="form-control" required>
-                        <option value="">Seleccione una marca</option>
-                        <?php
-                        $marca_sql = "SELECT * FROM marcas";
-                        $marca_result = $conn->query($marca_sql);
-
-                        while ($marca = $marca_result->fetch_assoc()) {
-                            echo "<option value='" . $marca['id_marca'] . "'>" . htmlspecialchars($marca['nombre']) . "</option>";
-                        }
-                        ?>
-                    </select>
-                </div>
                     <div class="form-group mb-3">
-                        <label for="">Nombre del producto</label>
-                        <input type="text" name="nombre" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="">Precio</label>
-                        <input type="number" name="precio" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="">Stock</label>
-                        <input type="number" name="stock" class="form-control" required>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label>Ubicación</label>
-                        <input type="text" name="ubicacion" class="form-control" required>
+                        <label for="id_unidad_medida">Unidad de Medida</label>
+                        <select name="id_unidad_medida" id="id_unidad_medida" class="form-control" required>
+                            <option value="">Seleccione una unidad de medida</option>
+                            <?php
+                            $unidades_sql = "SELECT * FROM unidades_medida";
+                            $unidades_result = $conn->query($unidades_sql);
+                            while ($unidad = $unidades_result->fetch_assoc()) {
+                                echo "<option value='" . $unidad['id_unidad_medida'] . "'>" . htmlspecialchars($unidad['nombre']) . "</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
 
-                        <div class="form-group mb-3">
-                        <input type="file" name="imagen" class="form-control" placeholder="Imágen del producto">
+                    <div class="form-group mb-3">
+                        <label for="id_marca">Marca</label>
+                        <select name="id_marca" id="id_marca" class="form-control" required>
+                            <option value="">Seleccione una marca</option>
+                            <?php
+                            $marca_sql = "SELECT * FROM marcas";
+                            $marca_result = $conn->query($marca_sql);
+                            while ($marca = $marca_result->fetch_assoc()) {
+                                echo "<option value='" . $marca['id_marca'] . "'>" . htmlspecialchars($marca['nombre']) . "</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="id_categoria">Categoría</label>
+                        <select name="id_categoria" id="id_categoria" class="form-control" required>
+                            <option value="">Seleccione una categoría</option>
+                            <?php
+                            $categoria_sql = "SELECT * FROM categorias";
+                            $categoria_result = $conn->query($categoria_sql);
+                            while ($categoria = $categoria_result->fetch_assoc()) {
+                                echo "<option value='" . $categoria['id_categoria'] . "'>" . htmlspecialchars($categoria['nombre']) . "</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="nombre">Nombre del producto</label>
+                        <input type="text" name="nombre" id="nombre" class="form-control" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="precio">Precio</label>
+                        <input type="number" name="precio" id="precio" class="form-control" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="stock">Stock</label>
+                        <input type="number" name="stock" id="stock" class="form-control" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="ubicacion">Ubicación</label>
+                        <input type="text" name="ubicacion" id="ubicacion" class="form-control" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="imagen">Imagen del producto</label>
+                        <input type="file" name="imagen" id="imagen" class="form-control">
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     <button type="submit" class="btn custom-orange-btn text-white">Agregar Producto</button>
@@ -113,7 +133,6 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                             <?php
                             $unidades_sql = "SELECT * FROM unidades_medida";
                             $unidades_result = $conn->query($unidades_sql);
-
                             while ($unidad = $unidades_result->fetch_assoc()) {
                                 echo "<option value='" . $unidad['id_unidad_medida'] . "'>" . htmlspecialchars($unidad['nombre']) . "</option>";
                             }
@@ -127,9 +146,21 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                             <?php
                             $marcas_sql = "SELECT * FROM marcas";
                             $marcas_result = $conn->query($marcas_sql);
-
                             while ($marca = $marcas_result->fetch_assoc()) {
                                 echo "<option value='" . $marca['id_marca'] . "'>" . htmlspecialchars($marca['nombre']) . "</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="edit_id_categoria">Categoría</label>
+                        <select name="id_categoria" id="edit_id_categoria" class="form-control" required>
+                            <?php
+                            $categoria_sql = "SELECT * FROM categorias";
+                            $categoria_result = $conn->query($categoria_sql);
+                            while ($categoria = $categoria_result->fetch_assoc()) {
+                                echo "<option value='" . $categoria['id_categoria'] . "'>" . htmlspecialchars($categoria['nombre']) . "</option>";
                             }
                             ?>
                         </select>
@@ -156,14 +187,14 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                     </div>
 
                     <div class="form-group mb-3">
-                        <label>Imágen Actual</label>
+                        <label>Imagen Actual</label>
                         <div>
-                            <img id="current_image" src="" width="100" alt="Imágen del producto">
+                            <img id="current_image" src="" width="100" alt="Imagen del producto">
                         </div>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="edit_imagen">Actualizar Imágen del Producto</label>
+                        <label for="edit_imagen">Actualizar Imagen del Producto</label>
                         <input type="file" name="imagen" id="edit_imagen" class="form-control">
                     </div>
                 </div>
@@ -208,11 +239,12 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
         <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
             <thead class="bg-primary text-white">
                 <tr>
-                     <th>Marca</th>
+                    <th>Categoría</th>
+                    <th>Marca</th>
                     <th class="text-start">Producto</th>
-                    <th>Unidad de Medida</th>
-                    <th>Precio</th>
+                    <th>U. Medida</th>
                     <th>Existencia</th>
+                    <th>Precio</th>
                     <th>Fecha Ingreso</th>
                     <th>Ubicación</th>
                     <th>Estado</th>
@@ -227,11 +259,12 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
                         echo "<tr>";
+                        echo "<td>" . htmlspecialchars($row['categoria']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['marca']) . "</td>";
                         echo "<td class='text-start'>" . htmlspecialchars($row['nombre']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['unidad_medida']) . "</td>";
-                        echo "<td class='text-success fw-bold'>$" . htmlspecialchars($row['precio']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['stock']) . "</td>";
+                        echo "<td class='text-success fw-bold'>$" . htmlspecialchars($row['precio']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['fecha_ingreso']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['ubicacion']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['estado']) . "</td>";
@@ -240,25 +273,25 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
 
                         if ($row['estado'] === 'activo') {
                             echo "<a href='products/status_product.php?id=" . $row['id_producto'] . "&estatus=inactivo' class='btn btn-warning btn-sm me-2 rounded-pill shadow-sm'>
-                                    <i class='fas fa-ban'></i> Desactivar
+                                    <i class='fas fa-ban'></i> 
                                   </a>";
                         } else {
                             echo "<a href='products/status_product.php?id=" . $row['id_producto'] . "&estatus=activo' class='btn btn-success btn-sm me-2 rounded-pill shadow-sm'>
-                                    <i class='fas fa-check-circle'></i> Activar
+                                    <i class='fas fa-check-circle'></i> 
                                   </a>";
                         }
 
                         echo "<button class='btn btn-sm btn-outline-primary me-2 rounded-pill shadow-sm' onclick='openEditModal(" . json_encode($row) . ")'>
-                                <i class='fas fa-edit'></i> Editar
+                                <i class='fas fa-edit'></i>
                               </button>
                               <button class='btn btn-sm btn-outline-danger me-2 rounded-pill shadow-sm' onclick='openDeleteModal(" . json_encode($row) . ")'>
-                                <i class='fas fa-trash-alt'></i> Eliminar
+                                <i class='fas fa-trash-alt'></i>
                               </button>
                         </td>";
                         echo "</tr>";
                     }
                 } else {
-                    echo "<tr><td colspan='6' class='text-center text-muted'>No hay productos disponibles</td></tr>";
+                    echo "<tr><td colspan='12' class='text-center text-muted'>No hay productos disponibles</td></tr>";
                 }
                 ?>
             </tbody>
@@ -284,6 +317,7 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
 
     function openEditModal(productsData) {
         $('#edit_id_producto').val(productsData.id_producto);
+        $('#edit_id_categoria').val(productsData.id_categoria);
         $('#edit_unidad').val(productsData.id_unidad_medida);
         $('#edit_marca').val(productsData.id_marca);
         $('#edit_nombre').val(productsData.nombre); 

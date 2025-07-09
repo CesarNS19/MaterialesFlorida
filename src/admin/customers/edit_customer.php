@@ -13,6 +13,7 @@ if (isset($_POST['id_usuario'])) {
     $empleado = $result->fetch_assoc();
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+         $id_direccion = $_POST['id_direccion'];
         $nombre = $_POST['nombre'];
         $apellido_paterno = $_POST['apellido_paterno'];
         $apellido_materno = $_POST['apellido_materno'];
@@ -32,9 +33,9 @@ if (isset($_POST['id_usuario'])) {
             exit();
         }
 
-        $sql = "UPDATE usuarios SET nombre = ?, apellido_paterno = ?, apellido_materno = ?, email = ? WHERE id_usuario = ?";
+        $sql = "UPDATE usuarios SET id_direccion = ?, nombre = ?, apellido_paterno = ?, apellido_materno = ?, email = ? WHERE id_usuario = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssi", $nombre, $apellido_paterno, $apellido_materno, $email, $id);
+        $stmt->bind_param("issssi", $id_direccion, $nombre, $apellido_paterno, $apellido_materno, $email, $id);
 
         if ($stmt->execute()) {
             if ($stmt->affected_rows > 0) {
