@@ -144,7 +144,6 @@ $sql = "SELECT * FROM marcas". $searchQuery;
 </div>
 
 <script>
-
     $(document).ready(function() {
         $('#search').on('input', function() {
             let searchTerm = $(this).val();
