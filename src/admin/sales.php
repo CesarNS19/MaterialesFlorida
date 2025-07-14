@@ -4,28 +4,35 @@ require '../../mysql/connection.php';
 require 'slidebar.php'; 
 $title = "La Florida ┃ Ventas";
 
-$sql = "SELECT 
-            p.id_producto,
-            p.nombre AS nombre_producto,
-            p.precio,
-            um.nombre AS nombre_unidad,
-            u.id_usuario,
-            u.nombre AS nombre_usuario,
-            u.apellido_paterno,
-            u.apellido_materno,
-            d.ciudad,
-            v.id_venta,
-            v.fecha,
-            v.total,
-            dv.cantidad,
-            dv.subtotal
-        FROM productos p
-        JOIN unidades_medida um ON p.id_unidad_medida = um.id_unidad_medida
-        JOIN detalle_venta dv ON p.id_producto = dv.id_producto
-        JOIN ventas v ON dv.id_venta = v.id_venta
-        JOIN usuarios u ON v.id_usuario = u.id_usuario
-        JOIN direcciones d ON u.id_direccion = d.id_direccion
-        WHERE p.nombre = 'Cliente'";
+$id_usuario = isset($_GET["id_usuario"]) ? intval($_GET["id_usuario"]) : null;
+
+$nombre_completo = "";
+$result = false;
+
+if ($id_usuario) {
+    $query = "SELECT 
+                CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo,
+                c.id_carrito,
+                p.nombre AS nombre_producto,
+                um.nombre AS unidad_medida,
+                c.cantidad,
+                c.precio,
+                c.subtotal,
+                p.imagen
+            FROM carrito c
+            JOIN productos p ON c.id_producto = p.id_producto
+            JOIN usuarios u ON c.id_usuario = u.id_usuario
+            JOIN unidades_medida um ON p.id_unidad_medida = um.id_unidad_medida
+            WHERE c.id_usuario = $id_usuario";
+
+    $result = $conn->query($query);
+
+    if ($row = $result->fetch_assoc()) {
+        $nombre_completo = $row["nombre_completo"];
+    }
+
+    $result->data_seek(0);
+}
 ?>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -40,70 +47,120 @@ $sql = "SELECT
 
  <div class="container">
     <div class="text-end my-3">
-        <a href="index_admin.php" class="btn custom-orange-btn text-white">
+        <a href="view_sales.php" class="btn custom-orange-btn text-white">
             Ver Ventas
         </a>
     </div>
 
     <form id="productSearchForm" class="row g-2" action="sales/add_products.php" method="POST">
-        <div class="col-md-8">
-            <div class="input-group">
-                <span class="input-group-text bg-custom-orange text-white">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text" name="search" id="search" class="form-control" placeholder="Agregar producto por nombre...">
-            </div>
+    <input type="hidden" name="id_usuario" value="<?= $id_usuario ?>">
+    <div class="col-md-8">
+        <div class="input-group">
+            <span class="input-group-text bg-custom-orange text-white">
+                <i class="fas fa-search"></i>
+            </span>
+            <input type="text" name="product_name" id="product_name" class="form-control" placeholder="Agregar producto por nombre...">
         </div>
-    </form>
+    </div>
+</form>
 </div>
 
+<!-- Modal para Eliminar -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-custom-orange text-white">
+        <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body text-center">
+        ¿Estás seguro de que deseas eliminar este producto del carrito?
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <a href="#" id="btnConfirmDelete" class="btn custom-orange-btn text-white">Eliminar</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="container-fluid d-flex">
     <main class="flex-fill p-4 overflow-auto" id="main-content">
-        <h2 class="fw-bold custom-orange-text text-center">Productos</h2>
-    <div class="table-responsive">
-        <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
-            <thead class="bg-primary text-white">
-                <tr>
-                    <th>Producto</th>
-                    <th>Unidad de Medida</th>
-                    <th>Cantidad</th>
-                    <th>Precio</th>
-                    <th>Subtotal</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="products-container">
-                <?php
-                $result = $conn->query($sql);
-                
-                if ($result->num_rows > 0) {
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<tr>";
-                        echo "<td>" . htmlspecialchars($row['nombre']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['unidad_medida']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['cantidad']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['precio']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['subtotal']) . "</td>";
-                        echo "<button class='btn btn-sm btn-outline-primary me-2 rounded-pill shadow-sm' onclick='openEditModal(" . json_encode($row) . ")'>
-                                <i class='fas fa-edit'></i>
-                              </button>
-                              <button class='btn btn-sm btn-outline-danger me-2 rounded-pill shadow-sm' onclick='openDeleteModal(" . json_encode($row) . ")'>
-                                <i class='fas fa-trash-alt'></i>
-                              </button>
-                        </td>";
-                        echo "</tr>";
-                    }
-                } else {
-                    echo "<tr><td colspan='12' class='text-center text-muted'>No hay productos disponibles</td></tr>";
-                }
-                ?>
-            </tbody>
-        </table>
-    </main>    
+
+        <h2 class="fw-bold custom-orange-text text-center">
+            <?php if ($id_usuario): ?>
+                Productos para <?= htmlspecialchars($nombre_completo) ?>
+            <?php else: ?>
+                Productos
+            <?php endif; ?>
+        </h2>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Producto</th>
+                        <th>Unidad de Medida</th>
+                        <th>Cantidad</th>
+                        <th>Precio</th>
+                        <th>Subtotal</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="products-container">
+
+                    <?php if ($id_usuario && $result && $result->num_rows > 0): ?>
+                        <?php while ($row = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td>
+                                    <img src='../../img/<?= htmlspecialchars($row['imagen']) ?>' class='rounded' width='100px' height='60px' alt='Imágen Producto'>
+                                </td>
+                                <td><?= htmlspecialchars($row['nombre_producto']) ?></td>
+                                <td><?= htmlspecialchars($row['unidad_medida']) ?></td>
+                                <td><?= htmlspecialchars($row['cantidad']) ?></td>
+                                <td>$<?= htmlspecialchars($row['precio']) ?></td>
+                                <td>$<?= htmlspecialchars($row['subtotal']) ?></td>
+                                <td>
+                                    <button class='btn btn-sm btn-outline-danger me-2' 
+                                            onclick='eliminarProducto(<?= $row['id_carrito'] ?>, <?= $id_usuario ?>)' 
+                                            data-bs-toggle='modal' 
+                                            data-bs-target='#confirmDeleteModal'>
+                                        <i class='fas fa-trash'></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    <?php elseif ($id_usuario): ?>
+                        <tr>
+                            <td colspan="7">No hay productos en el carrito.</td>
+                        </tr>
+                    <?php endif; ?>
+
+                </tbody>
+            </table>
+        </div>
+
+        <?php if ($id_usuario): ?>
+            <div class="text-end my-3">
+                <form action="sales/sales_process.php" method="POST" onsubmit="return confirm('¿Confirmas realizar la venta?');">
+                    <input type="hidden" name="id_usuario" value="<?= $id_usuario ?>">
+                    <button type="submit" class="btn custom-orange-btn btn-md text-white">
+                        <i class="fas fa-cash-register me-2"></i> Realizar Venta
+                    </button>
+                </form>
+            </div>
+        <?php endif; ?>
+
+    </main>
 </div>
 
 <script>
+
+    function eliminarProducto(id_carrito, id_usuario) {
+        const btnDelete = document.getElementById("btnConfirmDelete");
+        btnDelete.href = "sales/delete_product.php?id=" + id_carrito + "&id_usuario=" + id_usuario;
+    }
 
     function mostrarToast(titulo, mensaje, tipo) {
             let icon = '';
