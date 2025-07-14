@@ -2,22 +2,54 @@
 require '../../../mysql/connection.php';
 require '../../../vendor/fpdf/fpdf.php';
 
+ob_start();
+
+function toIso($text) {
+    return iconv("UTF-8", "ISO-8859-1//TRANSLIT", $text);
+}
+
 if (!isset($_GET['id_venta'])) {
     die('ID de venta no proporcionado.');
 }
 
 $id_venta = intval($_GET['id_venta']);
 
-$sqlVenta = "SELECT v.*, CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS cliente
+$sqlVenta = "SELECT v.*, CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS cliente, u.id_direccion, u.telefono
              FROM ventas v
              JOIN usuarios u ON v.id_usuario = u.id_usuario
              WHERE v.id_venta = $id_venta";
 $resultVenta = $conn->query($sqlVenta);
-$venta = $resultVenta->fetch_assoc();
 
+if (!$resultVenta) {
+    die('Error en la consulta: ' . $conn->error);
+}
+
+$venta = $resultVenta->fetch_assoc();
 if (!$venta) {
     die('Venta no encontrada.');
 }
+
+$id_direccion = intval($venta['id_direccion']);
+
+$sql_dir = "SELECT 
+                CONCAT_WS(', ',
+                    d.calle,
+                    CONCAT('No. Ext ', d.num_ext),
+                    IF(d.num_int IS NOT NULL AND d.num_int != '', CONCAT('No. Int ', d.num_int), NULL),
+                    d.ciudad,
+                    d.estado,
+                    CONCAT('C.P. ', d.codigo_postal)
+                ) AS direccion_completa
+            FROM direcciones d
+            WHERE d.id_direccion = $id_direccion";
+$resultDireccion = $conn->query($sql_dir);
+
+if (!$resultDireccion) {
+    die('Error en la consulta de dirección: ' . $conn->error);
+}
+
+$direccion = $resultDireccion->fetch_assoc();
+$direccionCompleta = $direccion ? $direccion['direccion_completa'] : 'No disponible';
 
 $sqlDetalles = "SELECT dv.*, p.nombre AS producto
                 FROM detalle_venta dv
@@ -25,38 +57,76 @@ $sqlDetalles = "SELECT dv.*, p.nombre AS producto
                 WHERE dv.id_venta = $id_venta";
 $resultDetalles = $conn->query($sqlDetalles);
 
-$pdf = new FPDF();
-$pdf->AddPage();
-
-$pdf->SetFont('Arial', 'B', 16);
-$pdf->Cell(0, 10, 'Comprobante de Venta', 0, 1, 'C');
-
-$pdf->SetFont('Arial', '', 12);
-$pdf->Ln(5);
-$pdf->Cell(100, 8, "Cliente: " . $venta['cliente'], 0, 1);
-$pdf->Cell(100, 8, "Fecha: " . $venta['fecha'], 0, 1);
-$pdf->Cell(100, 8, "No. Venta: " . $venta['id_venta'], 0, 1);
-
-$pdf->Ln(8);
-
-$pdf->SetFont('Arial', 'B', 11);
-$pdf->Cell(70, 8, 'Producto', 1);
-$pdf->Cell(30, 8, 'Cantidad', 1);
-$pdf->Cell(30, 8, 'P. Unitario', 1);
-$pdf->Cell(30, 8, 'Subtotal', 1);
-$pdf->Ln();
-
-$pdf->SetFont('Arial', '', 11);
-while ($row = $resultDetalles->fetch_assoc()) {
-    $pdf->Cell(70, 8, $row['producto'], 1);
-    $pdf->Cell(30, 8, $row['cantidad'], 1);
-    $pdf->Cell(30, 8, '$' . number_format($row['precio_unitario'], 2), 1);
-    $pdf->Cell(30, 8, '$' . number_format($row['subtotal'], 2), 1);
-    $pdf->Ln();
+if (!$resultDetalles) {
+    die('Error en la consulta de detalles: ' . $conn->error);
 }
 
-$pdf->SetFont('Arial', 'B', 12);
-$pdf->Cell(130, 10, 'Total:', 1);
-$pdf->Cell(30, 10, '$' . number_format($venta['total'], 2), 1);
+$pdf = new FPDF('P','mm','A4');
+$pdf->AddPage();
 
-$pdf->Output("I", "venta_$id_venta.pdf");
+$pdf->Image('../../../img/cemex_logo.png', 10, 8, 30);
+$pdf->Ln(25);
+
+$pdf->SetFont('Arial','B',14);
+$pdf->Cell(0,6, toIso('MATERIALES PARA CONSTRUCCIÓN'), 0,1,'C');
+
+$pdf->SetFont('Arial','B',18);
+$pdf->Cell(0,8, toIso('"LA FLORIDA"'), 0,1,'C');
+
+$pdf->SetFont('Arial','',10);
+$pdf->Cell(0,5,toIso('CEMENTO, MORTERO, VARILLA SAN LUIS, ALAMBRE, ALAMBRÓN,'),0,1,'C');
+$pdf->Cell(0,5,toIso('BLOCK, ARENA, GRAVA Y PROYECTOS PRODUCTIVOS'),0,1,'C');
+
+$pdf->SetFont('Arial','B',10);
+$pdf->Cell(0,5,toIso('JOSE ALFREDO SALAZAR DUARTE'),0,1,'C');
+
+$pdf->SetFont('Arial','',9);
+$pdf->Cell(0,5,toIso('R.F.C. SADA-740714-QU4    CURP: SADA740714HMCLRL05'),0,1,'C');
+$pdf->Cell(0,5,toIso('LIBRAMIENTO TEJUPILCO-ALTAMIRANO KM. 2 COLONIA FLORIDA'),0,1,'C');
+$pdf->Cell(0,5,toIso('A 200 MTS. DE GASOLINERA TABACHINES MEX. (SOBRE EL LIBRAMIENTO) TEJUPILCO-MEX.'),0,1,'C');
+
+$pdf->SetFont('Arial','B',10);
+$pdf->Cell(0,5,toIso('TELS: 01 (724) 267-7169   722 350 5063   722 474 8048'),0,1,'C');
+
+$pdf->Ln(2);
+$pdf->Line(10,$pdf->GetY(),200,$pdf->GetY());
+$pdf->Ln(4);
+
+$pdf->SetFont('Arial','',10);
+$pdf->Cell(100,6, toIso('Tejupilco México, a: ') . date('d/m/Y',strtotime($venta['fecha'])),0,0);
+$pdf->Cell(0,6, toIso('PEDIDO No: ') . str_pad($venta['id_venta'],4,'0',STR_PAD_LEFT),0,1);
+
+$pdf->Cell(0,6, toIso('CLIENTE: ') . toIso($venta['cliente']),0,1);
+$pdf->Cell(0,6, toIso('DIRECCIÓN: ') . toIso($direccionCompleta),0,1);
+$pdf->Cell(0,6,toIso('POBLACIÓN: ') . toIso($venta['telefono']),0,1);
+$pdf->Ln(4);
+
+$pdf->SetFont('Arial','B',10);
+$pdf->Cell(20,8,toIso('CANT.'),1,0,'C');
+$pdf->Cell(100,8,toIso('DESCRIPCIÓN'),1,0,'C');
+$pdf->Cell(35,8,toIso('PRECIO U.'),1,0,'C');
+$pdf->Cell(35,8,toIso('IMPORTE'),1,1,'C');
+
+$pdf->SetFont('Arial','',10);
+while($row = $resultDetalles->fetch_assoc()){
+    $pdf->Cell(20,8,$row['cantidad'],1,0,'C');
+    $pdf->Cell(100,8,toIso($row['producto']),1);
+    $pdf->Cell(35,8,'$'.number_format($row['precio_unitario'],2),1,0,'R');
+    $pdf->Cell(35,8,'$'.number_format($row['subtotal'],2),1,1,'R');
+}
+
+$pdf->SetFont('Arial','B',10);
+$pdf->Cell(155,8,toIso('TOTAL'),1,0,'R');
+$pdf->Cell(35,8,'$'.number_format($venta['total'],2),1,1,'R');
+
+$pdf->Ln(8);
+$pdf->SetFont('Arial','',9);
+$pdf->MultiCell(0,5,toIso(
+"Debo (emos) y pagare (mos) incondicionalmente a la orden de JOSE ALFREDO SALAZAR DUARTE, en esta ciudad, la cantidad de \$__________________________ el día ____________________________. Importe de la mercancía recibida a mi entera satisfacción. En caso de incumplimiento, este pagaré causará intereses moratorios del ________ % mensual."
+));
+
+$pdf->Ln(8);
+$pdf->Cell(0,6,toIso('FIRMA DE CONFORMIDAD: ____________________________'),0,1,'R');
+
+$pdf->Output("I","pedido_$id_venta.pdf");
+ob_end_flush();

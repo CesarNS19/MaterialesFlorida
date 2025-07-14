@@ -10,7 +10,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     $searchQuery = " WHERE p.nombre LIKE '%" . $conn->real_escape_string($searchTerm) . "%' ";
 }
 
- $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.email, p.estatus AS estado, p.nombre AS perfil, p.id_perfil, u.id_direccion, d.ciudad
+ $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.email, p.estatus AS estado, p.nombre AS perfil, p.id_perfil, u.id_direccion, d.ciudad, u.telefono
                 FROM usuarios u
                 JOIN perfil p ON u.id_perfil = p.id_perfil
                 JOIN direcciones d ON u.id_direccion = d.id_direccion
@@ -57,6 +57,10 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                             }
                             ?>
                         </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Telefono</label>
+                        <input type="number" name="telefono" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
                         <label>Email</label>
@@ -115,6 +119,11 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                             ?>
                         </select>
                     </div>
+
+                    <div class="form-group mb-3">
+                        <label for="edit_telefono">Telefono</label>
+                        <input type="number" name="telefono" id="edit_telefono" class="form-control" required>
+                    </div>
                     
                 </div>
                 <div class="modal-footer">
@@ -160,7 +169,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                     <th>Cliente</th>
                     <th>Direccion</th>
                     <th>Email</th>
-                    <th>Perfil</th>
+                    <th>Telefono</th>
                     <th>Estatus</th>
                     <th>Acciones</th>
                 </tr>
@@ -176,7 +185,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                         echo "<td>" . $nombre_completo . "</td>";
                         echo "<td>" . htmlspecialchars($row['ciudad']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['perfil']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['telefono']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['estado']) . "</td>";
                         echo "<td>";
 
@@ -228,11 +237,12 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 
     function openEditModal(data) {
         $('#edit_id_usuario').val(data.id_usuario);
-         $('#edit_id_direccion').val(data.id_direccion);
+        $('#edit_id_direccion').val(data.id_direccion);
         $('#edit_nombre').val(data.nombre);
         $('#edit_apellido_paterno').val(data.apellido_paterno);
         $('#edit_apellido_materno').val(data.apellido_materno);
         $('#edit_email').val(data.email);
+        $('#edit_telefono').val(data.telefono);
         $('#editCustomerModal').modal('show');
     }
 
