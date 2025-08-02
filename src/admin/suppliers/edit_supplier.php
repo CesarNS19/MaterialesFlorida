@@ -13,14 +13,14 @@ if (isset($_POST['id_proveedor'])) {
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $nombre = $_POST['nombre'];
-        $producto = $_POST['producto'];
+        $id_producto = $_POST['id_producto'];
         $telefono = $_POST['telefono'];
         $email = $_POST['email'];
         $direccion = $_POST['id_direccion'];
     
-        $sql = "UPDATE proveedores SET nombre = ?, producto = ?, telefono = ?, email = ?, id_direccion = ? WHERE id_proveedor = ?";
+        $sql = "UPDATE proveedores SET nombre = ?, id_producto = ?, telefono = ?, email = ?, id_direccion = ? WHERE id_proveedor = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssii", $nombre, $producto, $telefono, $email, $direccion, $id);
+        $stmt->bind_param("sissii", $nombre, $id_producto, $telefono, $email, $direccion, $id);
     
         if ($stmt->execute()) {
             if ($stmt->affected_rows > 0) {

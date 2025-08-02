@@ -12,8 +12,9 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         producto LIKE '%$searchTerm%'";
 }
 
- $sql = "SELECT p.nombre, p.producto, p.telefono, p.email, p.fecha_ingreso, p.id_proveedor, p.estatus, d.id_direccion, d.ciudad
+ $sql = "SELECT p.nombre, p.id_producto, p.telefono, p.email, p.fecha_ingreso, p.id_proveedor, p.estatus, d.id_direccion, d.ciudad, pro.nombre AS nombre_producto
         FROM proveedores p
+        JOIN productos pro ON p.id_producto = pro.id_producto
         JOIN direcciones d ON p.id_direccion = d.id_direccion". $searchQuery;
 ?>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -38,8 +39,17 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                         <input type="text" name="nombre" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
-                        <label>Producto que provee</label>
-                        <input type="text" name="producto" class="form-control" required>
+                        <label for="id_producto">Producto que provee</label>
+                        <select name="id_producto" id="id_producto" class="form-control" required>
+                            <option value="">Seleccione un producto</option>
+                            <?php
+                            $prod_sql = "SELECT * FROM productos";
+                            $prod_result = $conn->query($prod_sql);
+                            while ($prod = $prod_result->fetch_assoc()) {
+                                echo "<option value='" . $prod['id_producto'] . "'>" . htmlspecialchars($prod['nombre']) . "</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
                     <div class="form-group mb-3">
                         <label>Teléfono</label>
@@ -89,8 +99,16 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                     </div>
                     
                     <div class="form-group mb-3">
-                        <label for="edit_producto">Producto que provee</label>
-                        <input type="text" name="producto" id="edit_producto" class="form-control" required>
+                        <label for="edit_producto">Producto</label>
+                        <select name="id_producto" id="edit_producto" class="form-control" required>
+                            <?php
+                            $prod_sql = "SELECT * FROM productos";
+                            $prod_result = $conn->query($prod_sql);
+                            while ($prod = $prod_result->fetch_assoc()) {
+                                echo "<option value='" . $prod['id_producto'] . "'>" . htmlspecialchars($prod['nombre']) . "</option>";
+                            }
+                            ?>
+                        </select>
                     </div>
                     
                     <div class="form-group mb-3">
@@ -175,7 +193,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                         $nombre_completo = htmlspecialchars($row['nombre']);
                         echo "<tr>";
                         echo "<td>" . $nombre_completo . "</td>";
-                        echo "<td>" . htmlspecialchars($row['producto']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['nombre_producto']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['telefono']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['email']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['ciudad']) . "</td>";
