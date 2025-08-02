@@ -204,11 +204,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                             </button>
                             <button class='btn btn-sm btn-outline-danger me-2 rounded-pill shadow-sm' onclick='openDeleteModal(" . json_encode($row) . ")'>
                                 <i class='fas fa-trash-alt'></i> Eliminar
-                            </button>
-                            <a href='sales.php?id_usuario=" . $row['id_usuario'] . "' class='btn btn-sm btn-outline-success rounded-pill shadow-sm'>
-                                <i class='fas fa-shopping-cart'></i> Realizar Venta
-                            </a>";
-
+                            </button>";
                         echo "</td>";
                     }
                 }

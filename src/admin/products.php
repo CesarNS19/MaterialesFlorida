@@ -91,7 +91,7 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="stock">Stock</label>
+                        <label for="stock">Existencia</label>
                         <input type="number" name="stock" id="stock" class="form-control" required>
                     </div>
 
@@ -174,11 +174,6 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                     <div class="form-group mb-3">
                         <label for="edit_precio">Precio del Producto</label>
                         <input type="number" name="precio" id="edit_precio" class="form-control" required>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label for="edit_stock">Stock</label>
-                        <input type="number" name="stock" id="edit_stock" class="form-control" required>
                     </div>
 
                     <div class="form-group mb-3">
@@ -322,7 +317,6 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
         $('#edit_marca').val(productsData.id_marca);
         $('#edit_nombre').val(productsData.nombre); 
         $('#edit_precio').val(productsData.precio);
-        $('#edit_stock').val(productsData.stock);
         $('#edit_ubicacion').val(productsData.ubicacion);
         $('#edit_estado').val(productsData.estado);
         $('#current_image').attr('src', '../../img/' + productsData.imagen);
