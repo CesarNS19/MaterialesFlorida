@@ -183,7 +183,6 @@ $result = $conn->query($sql);
             }
             echo "</div>";
 
-            // PAGINACION
             if ($totalPaginas > 1) {
                 echo '<nav class="mt-4">';
                 echo '<ul class="pagination justify-content-center">';

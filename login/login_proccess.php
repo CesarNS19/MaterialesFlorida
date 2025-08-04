@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $conn->prepare("
         SELECT u.id_usuario, u.email, u.contrasena, u.nombre AS nombre_usuario,
                u.apellido_paterno, u.apellido_materno,
-               p.nombre AS perfil_nombre, p.estatus
+               p.nombre AS perfil_nombre, u.estatus
         FROM usuarios u
         INNER JOIN perfil p ON u.id_perfil = p.id_perfil
         WHERE u.email = ?
