@@ -6,8 +6,11 @@ $title = "La Florida ┃ Productos";
 
 $searchQuery = "";
 if (isset($_GET['search']) && !empty($_GET['search'])) {
-    $searchTerm = $_GET['search'];
-    $searchQuery = " WHERE p.nombre LIKE '%" . $conn->real_escape_string($searchTerm) . "%' ";
+    $searchTerm = $conn->real_escape_string($_GET['search']);
+    $searchQuery = " WHERE 
+        p.nombre LIKE '%$searchTerm%' 
+        OR c.nombre LIKE '%$searchTerm%' 
+        OR m.nombre LIKE '%$searchTerm%'";
 }
 
 $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
@@ -17,7 +20,8 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
         FROM productos p
         JOIN marcas m ON p.id_marca = m.id_marca
         JOIN categorias c ON p.id_categoria = c.id_categoria
-        JOIN unidades_medida u ON p.id_unidad_medida = u.id_unidad_medida" . $searchQuery;
+        JOIN unidades_medida u ON p.id_unidad_medida = u.id_unidad_medida
+        $searchQuery";
 ?>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">

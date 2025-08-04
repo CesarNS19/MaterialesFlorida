@@ -6,16 +6,18 @@ $title = "La Florida ┃ Empleados";
 
 $searchQuery = "";
 if (isset($_GET['search']) && !empty($_GET['search'])) {
-    $searchTerm = $_GET['search'];
+    $searchTerm = $conn->real_escape_string($_GET['search']);
     $searchQuery = " WHERE 
-        nombre LIKE '%$searchTerm%' OR 
-        producto LIKE '%$searchTerm%'";
+        p.nombre LIKE '%$searchTerm%' OR 
+        pro.nombre LIKE '%$searchTerm%' OR 
+        d.ciudad LIKE '%$searchTerm%'";
 }
 
- $sql = "SELECT p.nombre, p.id_producto, p.telefono, p.email, p.fecha_ingreso, p.id_proveedor, p.estatus, d.id_direccion, d.ciudad, pro.nombre AS nombre_producto
+$sql = "SELECT p.nombre, p.id_producto, p.telefono, p.email, p.fecha_ingreso, p.id_proveedor, p.estatus, d.id_direccion, d.ciudad, pro.nombre AS nombre_producto
         FROM proveedores p
         JOIN productos pro ON p.id_producto = pro.id_producto
-        JOIN direcciones d ON p.id_direccion = d.id_direccion". $searchQuery;
+        JOIN direcciones d ON p.id_direccion = d.id_direccion
+        $searchQuery";
 ?>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
