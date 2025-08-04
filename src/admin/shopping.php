@@ -37,51 +37,49 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
             </div>
             <form action="shopping/add_shopping.php" method="POST">
                 <div class="modal-body">
+
                     <div class="form-group mb-3">
                         <label for="id_provedor">Proveedor</label>
                         <select name="id_provedor" id="id_provedor" class="form-control" required>
                             <option value="">Seleccione un proveedor</option>
                             <?php
-                            $pro_sql = "SELECT * FROM proveedores";
+                            $pro_sql = "SELECT p.id_producto, p.nombre AS nombre_producto, prov.id_proveedor, prov.nombre 
+                                        FROM proveedores prov 
+                                        JOIN productos p ON prov.id_producto = p.id_producto";
                             $pro_result = $conn->query($pro_sql);
                             while ($pro = $pro_result->fetch_assoc()) {
-                                echo "<option value='" . $pro['id_proveedor'] . "'>" . htmlspecialchars($pro['nombre']) . "</option>";
+                                echo "<option value='" . $pro['id_proveedor'] . "' 
+                                            data-producto-id='" . $pro['id_producto'] . "' 
+                                            data-producto-nombre='" . htmlspecialchars($pro['nombre_producto']) . "'>
+                                            " . htmlspecialchars($pro['nombre']) . "
+                                      </option>";
                             }
                             ?>
                         </select>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="id_producto">Producto</label>
-                        <select name="id_producto" id="id_producto" class="form-control" required>
-                            <option value="">Seleccione un producto</option>
-                            <?php
-                            $prod_sql = "SELECT * FROM productos";
-                            $prod_result = $conn->query($prod_sql);
-                            while ($prod = $prod_result->fetch_assoc()) {
-                                echo "<option value='" . $prod['id_producto'] . "'>" . htmlspecialchars($prod['nombre']) . "</option>";
-                            }
-                            ?>
-                        </select>
+                        <label for="nombre_producto">Producto</label>
+                        <input type="text" id="nombre_producto" class="form-control" readonly>
+                        <input type="hidden" name="id_producto" id="id_producto">
                     </div>
 
                     <div class="form-group mb-3">
                         <label for="cantidad">Cantidad</label>
-                        <input type="number" name="cantidad" id="cantidad" class="form-control" required>
+                        <input type="number" name="cantidad" id="cantidad" class="form-control" step="0.01" required>
                     </div>
 
                     <div class="form-group mb-3">
                         <label for="precio">Precio</label>
-                        <input type="number" name="precio" id="precio" class="form-control" required>
+                        <input type="number" name="precio" id="precio" class="form-control" step="0.01" required>
                     </div>
 
-                     <div class="form-group mb-3">
+                    <div class="form-group mb-3">
                         <label for="subtotal">Total</label>
-                        <input type="number" name="subtotal" id="subtotal" class="form-control" required>
+                        <input type="number" name="subtotal" id="subtotal" class="form-control" readonly required>
                     </div>
 
                 </div>
-
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                     <button type="submit" class="btn custom-orange-btn text-white">Realizar Compra</button>
@@ -145,20 +143,22 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
 </div>
 
 <script>
-    $(document).ready(function() {
-        $('#search').on('input', function() {
-            let searchTerm = $(this).val();
-            
-            $.ajax({
-                url: "products/search_products.php",
-                type: "GET",
-                data: { search: searchTerm },
-                success: function(response) {
-                    $('#products-container').html(response);
-                }
-            });
-        });
+   $(document).ready(function() {
+    $('#id_provedor').on('change', function() {
+        const selected = $(this).find(':selected');
+        const productoId = selected.data('producto-id');
+        const productoNombre = selected.data('producto-nombre');
+
+        $('#id_producto').val(productoId);
+        $('#nombre_producto').val(productoNombre);
     });
+
+    $('#cantidad, #precio').on('input', function() {
+        const cantidad = parseFloat($('#cantidad').val()) || 0;
+        const precio = parseFloat($('#precio').val()) || 0;
+        $('#subtotal').val((cantidad * precio).toFixed(2));
+    });
+});
     
     function mostrarToast(titulo, mensaje, tipo) {
             let icon = '';
