@@ -10,7 +10,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     $searchQuery = " WHERE p.nombre LIKE '%" . $conn->real_escape_string($searchTerm) . "%' ";
 }
 
- $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.email, p.estatus AS estado, p.nombre AS perfil, p.id_perfil, u.id_direccion, d.ciudad, u.telefono
+ $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.email, u.estatus AS estado, p.nombre AS perfil, p.id_perfil, u.id_direccion, d.ciudad, u.telefono
                 FROM usuarios u
                 JOIN perfil p ON u.id_perfil = p.id_perfil
                 JOIN direcciones d ON u.id_direccion = d.id_direccion
@@ -190,11 +190,11 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                         echo "<td>";
 
                         if ($row['estado'] === 'activo') {
-                            echo "<a href='customers/status_customer.php?id=" . $row['id_perfil'] . "&estatus=inactivo' class='btn btn-warning btn-sm me-2 rounded-pill shadow-sm'>
+                            echo "<a href='customers/status_customer.php?id=" . $row['id_usuario'] . "&estatus=inactivo' class='btn btn-warning btn-sm me-2 rounded-pill shadow-sm'>
                                     <i class='fas fa-ban'></i> Desactivar
                                 </a>";
                         } else {
-                            echo "<a href='customers/status_customer.php?id=" . $row['id_perfil'] . "&estatus=activo' class='btn btn-success btn-sm me-2 rounded-pill shadow-sm'>
+                            echo "<a href='customers/status_customer.php?id=" . $row['id_usuario'] . "&estatus=activo' class='btn btn-success btn-sm me-2 rounded-pill shadow-sm'>
                                     <i class='fas fa-check-circle'></i> Activar
                                 </a>";
                         }

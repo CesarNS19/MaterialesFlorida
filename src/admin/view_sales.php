@@ -35,7 +35,7 @@ if (!empty($whereClauses)) {
     $searchQuery = " WHERE " . implode(" AND ", $whereClauses);
 }
 
-$ventasPorPagina = 6;
+$ventasPorPagina = 10;
 $paginaActual = isset($_GET['pagina']) ? max(1, intval($_GET['pagina'])) : 1;
 $offset = ($paginaActual - 1) * $ventasPorPagina;
 

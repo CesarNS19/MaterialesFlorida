@@ -3,16 +3,18 @@ require '../../../mysql/connection.php';
 session_start();
 
 if (isset($_GET['id']) && isset($_GET['estatus'])) {
-    $id_perfil = intval($_GET['id']);
+    $id_usuario = intval($_GET['id']);
     $nuevo_estatus = $_GET['estatus'];
 
     if ($nuevo_estatus === 'activo' || $nuevo_estatus === 'inactivo') {
-        $sql = "UPDATE perfil SET estatus = ? WHERE id_perfil = ?";
+        $sql = "UPDATE usuarios SET estatus = ? WHERE id_usuario = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param('si', $nuevo_estatus, $id_perfil);
+        $stmt->bind_param('si', $nuevo_estatus, $id_usuario);
 
         if ($stmt->execute()) {
-            $_SESSION['status_message'] = $nuevo_estatus === 'activo' ? 'Empleado activado correctamente.' : 'Empleado desactivado correctamente.';
+            $_SESSION['status_message'] = $nuevo_estatus === 'activo' 
+                ? 'Empleado activado correctamente.' 
+                : 'Empleado desactivado correctamente.';
             $_SESSION['status_type'] = 'success';
         } else {
             $_SESSION['status_message'] = 'Error al actualizar el estado del empleado: ' . $stmt->error;
