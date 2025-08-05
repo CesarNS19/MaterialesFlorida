@@ -6,6 +6,11 @@ $title = "La Florida ┃ Ventas";
 
 $id_usuario = isset($_GET["id_usuario"]) ? intval($_GET["id_usuario"]) : null;
 
+$usuarios_result = $conn->query("SELECT u.id_usuario, CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo 
+                                 FROM usuarios u
+                                 JOIN perfil p ON u.id_perfil = p.id_perfil
+                                 WHERE p.nombre = 'Cliente'");
+
 $nombre_completo = "";
 $result = false;
 
@@ -14,6 +19,7 @@ if ($id_usuario) {
                 CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo,
                 c.id_carrito,
                 p.nombre AS nombre_producto,
+                p.stock,
                 um.nombre AS unidad_medida,
                 c.cantidad,
                 c.precio,
@@ -41,28 +47,46 @@ if ($id_usuario) {
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <title><?php echo $title; ?></title>
-<div class="container">
-    
-<div id="Alert" class="container"></div>
 
- <div class="container">
+<div class="container">
+
+    <div id="Alert" class="container mt-3"></div>
+
     <div class="text-end my-3">
         <a href="view_sales.php" class="btn custom-orange-btn text-white">
             Ver Ventas
         </a>
     </div>
 
-    <form id="productSearchForm" class="row g-2" action="sales/add_products.php" method="POST">
-    <input type="hidden" name="id_usuario" value="<?= $id_usuario ?>">
-    <div class="col-md-8">
-        <div class="input-group">
-            <span class="input-group-text bg-custom-orange text-white">
-                <i class="fas fa-search"></i>
-            </span>
-            <input type="text" name="product_name" id="product_name" class="form-control" placeholder="Agregar producto por nombre...">
+<!-- Formulario para seleccionar cliente -->
+      <form id="selectUserForm" method="GET" action="">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-6">
+                <label for="id_usuario" class="form-label">Seleccionar Usuario:</label>
+                <select class="form-select" id="id_usuario" name="id_usuario" onchange="document.getElementById('selectUserForm').submit();">
+                    <option value="">-- Selecciona un usuario --</option>
+                    <?php while ($usuario = $usuarios_result->fetch_assoc()): ?>
+                        <option value="<?= $usuario['id_usuario'] ?>" <?= ($id_usuario == $usuario['id_usuario']) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($usuario['nombre_completo']) ?>
+                        </option>
+                    <?php endwhile; ?>
+                </select>
+            </div>
         </div>
-    </div>
-</form>
+    </form>
+
+<!-- Formulario de Búsqueda -->
+    <form id="productSearchForm" class="row g-2" action="sales/add_products.php" method="POST">
+        <input type="hidden" name="id_usuario" value="<?= $id_usuario ?>">
+        <div class="col-md-8">
+            <div class="input-group">
+                <span class="input-group-text bg-custom-orange text-white">
+                    <i class="fas fa-search"></i>
+                </span>
+                <input type="text" name="product_name" id="product_name" class="form-control" placeholder="Agregar producto por nombre...">
+            </div>
+        </div>
+    </form>
 </div>
 
 <!-- Modal para Eliminar -->
@@ -84,6 +108,7 @@ if ($id_usuario) {
   </div>
 </div>
 
+<!-- Carrito de productos -->
 <div class="container-fluid d-flex">
     <main class="flex-fill p-4 overflow-auto" id="main-content">
 
@@ -102,6 +127,7 @@ if ($id_usuario) {
                         <th>Imagen</th>
                         <th>Producto</th>
                         <th>Unidad de Medida</th>
+                        <th>Existencia</th>
                         <th>Cantidad</th>
                         <th>Precio</th>
                         <th>Subtotal</th>
@@ -118,6 +144,7 @@ if ($id_usuario) {
                                 </td>
                                 <td><?= htmlspecialchars($row['nombre_producto']) ?></td>
                                 <td><?= htmlspecialchars($row['unidad_medida']) ?></td>
+                                <td><?= htmlspecialchars($row['stock']) ?></td>
                                 <td><?= htmlspecialchars($row['cantidad']) ?></td>
                                 <td>$<?= htmlspecialchars($row['precio']) ?></td>
                                 <td>$<?= htmlspecialchars($row['subtotal']) ?></td>
@@ -133,7 +160,7 @@ if ($id_usuario) {
                         <?php endwhile; ?>
                     <?php elseif ($id_usuario): ?>
                         <tr>
-                            <td colspan="7">No hay productos en el carrito.</td>
+                            <td colspan="8">No hay productos en el carrito.</td>
                         </tr>
                     <?php endif; ?>
 
@@ -156,65 +183,64 @@ if ($id_usuario) {
 </div>
 
 <script>
-
     function eliminarProducto(id_carrito, id_usuario) {
         const btnDelete = document.getElementById("btnConfirmDelete");
         btnDelete.href = "sales/delete_product.php?id=" + id_carrito + "&id_usuario=" + id_usuario;
     }
 
     function mostrarToast(titulo, mensaje, tipo) {
-            let icon = '';
-            let alertClass = '';
+        let icon = '';
+        let alertClass = '';
 
-            switch (tipo) {
-                case 'success':
-                    icon = '<span class="fas fa-check-circle text-white fs-6"></span>';
-                    alertClass = 'alert-success';
-                    break;
-                case 'error':
-                    icon = '<span class="fas fa-times-circle text-white fs-6"></span>';
-                    alertClass = 'alert-danger';
-                    break;
-                case 'warning':
-                    icon = '<span class="fas fa-exclamation-circle text-white fs-6"></span>';
-                    alertClass = 'alert-warning';
-                    break;
-                case 'info':
-                    icon = '<span class="fas fa-info-circle text-white fs-6"></span>';
-                    alertClass = 'alert-info';
-                    break;
-                default:
-                    icon = '<span class="fas fa-info-circle text-white fs-6"></span>';
-                    alertClass = 'alert-info';
-                    break;
-            }
-
-            const alert = `
-            <div class="alert ${alertClass} d-flex align-items-center alert-dismissible fade show" role="alert">
-                <div class="me-2">${icon}</div>
-                <div>${titulo}: ${mensaje}</div>
-                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>`;
-
-            $("#Alert").html(alert);
-
-            setTimeout(() => {
-                $(".alert").alert('close');
-            }, 4000);
+        switch (tipo) {
+            case 'success':
+                icon = '<span class="fas fa-check-circle text-white fs-6"></span>';
+                alertClass = 'alert-success';
+                break;
+            case 'error':
+                icon = '<span class="fas fa-times-circle text-white fs-6"></span>';
+                alertClass = 'alert-danger';
+                break;
+            case 'warning':
+                icon = '<span class="fas fa-exclamation-circle text-white fs-6"></span>';
+                alertClass = 'alert-warning';
+                break;
+            case 'info':
+                icon = '<span class="fas fa-info-circle text-white fs-6"></span>';
+                alertClass = 'alert-info';
+                break;
+            default:
+                icon = '<span class="fas fa-info-circle text-white fs-6"></span>';
+                alertClass = 'alert-info';
+                break;
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
-            <?php if (isset($_SESSION['status_message']) && isset($_SESSION['status_type'])): ?>
-                <?php if ($_SESSION["status_type"] === "warning"): ?>
-                    mostrarToast("Advertencia", '<?= $_SESSION["status_message"] ?>', '<?= $_SESSION["status_type"] ?>');
-                <?php elseif ($_SESSION["status_type"] === "error"): ?>
-                    mostrarToast("Error", '<?= $_SESSION["status_message"] ?>', '<?= $_SESSION["status_type"] ?>');
-                <?php elseif ($_SESSION["status_type"] === "info"): ?>
-                    mostrarToast("Info", '<?= $_SESSION["status_message"] ?>', '<?= $_SESSION["status_type"] ?>');
-                <?php else: ?>
-                    mostrarToast("Éxito", '<?= $_SESSION["status_message"] ?>', '<?= $_SESSION["status_type"] ?>');
-                <?php endif; ?>
-                <?php unset($_SESSION['status_message'], $_SESSION['status_type']); ?>
+        const alert = `
+        <div class="alert ${alertClass} d-flex align-items-center alert-dismissible fade show" role="alert">
+            <div class="me-2">${icon}</div>
+            <div>${titulo}: ${mensaje}</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>`;
+
+        $("#Alert").html(alert);
+
+        setTimeout(() => {
+            $(".alert").alert('close');
+        }, 4000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        <?php if (isset($_SESSION['status_message']) && isset($_SESSION['status_type'])): ?>
+            <?php if ($_SESSION["status_type"] === "warning"): ?>
+                mostrarToast("Advertencia", '<?= $_SESSION["status_message"] ?>', '<?= $_SESSION["status_type"] ?>');
+            <?php elseif ($_SESSION["status_type"] === "error"): ?>
+                mostrarToast("Error", '<?= $_SESSION["status_message"] ?>', '<?= $_SESSION["status_type"] ?>');
+            <?php elseif ($_SESSION["status_type"] === "info"): ?>
+                mostrarToast("Info", '<?= $_SESSION["status_message"] ?>', '<?= $_SESSION["status_type"] ?>');
+            <?php else: ?>
+                mostrarToast("Éxito", '<?= $_SESSION["status_message"] ?>', '<?= $_SESSION["status_type"] ?>');
             <?php endif; ?>
-        });
+            <?php unset($_SESSION['status_message'], $_SESSION['status_type']); ?>
+        <?php endif; ?>
+    });
 </script>

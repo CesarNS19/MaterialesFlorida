@@ -4,17 +4,17 @@ session_start();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id_direccion = $_POST['id_direccion'];
+    $id_producto = $_POST['id_producto'];
     $nombre = $_POST['nombre'];
-    $producto = $_POST['producto'];
     $telefono = $_POST['telefono'];
     $email = $_POST['email'];
     $estatus = 'activo';
     $fecha = date('Y-m-d');
 
-    $sql = "INSERT INTO proveedores (id_direccion, nombre, producto, telefono, email, estatus, fecha_ingreso) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO proveedores (id_direccion, id_producto, nombre, telefono, email, estatus, fecha_ingreso) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     $stmt = $conn->prepare($sql);
-        $stmt->bind_param("issssss", $id_direccion,$nombre, $producto, $telefono, $email, $estatus, $fecha);
+        $stmt->bind_param("iisssss", $id_direccion, $id_producto, $nombre, $telefono, $email, $estatus, $fecha);
 
     if ($stmt->execute()) {
         $_SESSION['status_message'] = "Proveedor agregado exitosamente.";

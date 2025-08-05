@@ -8,6 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $apellido_paterno = $_POST['apellido_paterno'];
     $apellido_materno = $_POST['apellido_materno'];
     $email = $_POST['email'];
+    $telefono = $_POST['telefono'];
 
     $id_perfil = 3;
 
@@ -22,11 +23,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $_SESSION['status_type'] = "danger";
     } else {
 
-        $sql = "INSERT INTO usuarios (id_perfil, id_direccion, nombre, apellido_paterno, apellido_materno, email) 
-                VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO usuarios (id_perfil, id_direccion, nombre, apellido_paterno, apellido_materno, email, telefono) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iissss", $id_perfil, $id_direccion, $nombre, $apellido_paterno, $apellido_materno, $email);
+        $stmt->bind_param("iisssss", $id_perfil, $id_direccion, $nombre, $apellido_paterno, $apellido_materno, $email, $telefono);
 
         if ($stmt->execute()) {
             $_SESSION['status_message'] = "Cliente agregado exitosamente.";

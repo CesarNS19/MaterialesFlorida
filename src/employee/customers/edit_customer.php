@@ -18,6 +18,7 @@ if (isset($_POST['id_usuario'])) {
         $apellido_paterno = $_POST['apellido_paterno'];
         $apellido_materno = $_POST['apellido_materno'];
         $email = $_POST['email'];
+        $telefono = $_POST['telefono'];
 
         $checkEmailSql = "SELECT id_usuario FROM usuarios WHERE email = ? AND id_usuario != ?";
         $checkEmailStmt = $conn->prepare($checkEmailSql);
@@ -33,9 +34,9 @@ if (isset($_POST['id_usuario'])) {
             exit();
         }
 
-        $sql = "UPDATE usuarios SET id_direccion = ?, nombre = ?, apellido_paterno = ?, apellido_materno = ?, email = ? WHERE id_usuario = ?";
+        $sql = "UPDATE usuarios SET id_direccion = ?, nombre = ?, apellido_paterno = ?, apellido_materno = ?, email = ?, telefono = ? WHERE id_usuario = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("issssi", $id_direccion, $nombre, $apellido_paterno, $apellido_materno, $email, $id);
+        $stmt->bind_param("isssssi", $id_direccion, $nombre, $apellido_paterno, $apellido_materno, $email, $telefono, $id);
 
         if ($stmt->execute()) {
             if ($stmt->affected_rows > 0) {
