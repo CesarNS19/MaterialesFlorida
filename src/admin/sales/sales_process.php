@@ -54,6 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'])) {
 
             $_SESSION['status_message'] = "Venta realizada exitosamente.";
             $_SESSION['status_type'] = "success";
+            header("Location: ../sales.php?id_usuario=$id_usuario&id_venta=$id_venta");
+
         } else {
             $_SESSION['status_message'] = "Error al guardar detalles de la venta.";
             $_SESSION['status_type'] = "error";
@@ -62,12 +64,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'])) {
         $_SESSION['status_message'] = "Error al registrar la venta.";
         $_SESSION['status_type'] = "error";
     }
-
-    header("Location: ../sales.php?id_usuario=$id_usuario");
     exit;
 } else {
     $_SESSION['status_message'] = "Datos inválidos para procesar la venta.";
     $_SESSION['status_type'] = "error";
     header("Location: ../sales.php");
+    
     exit;
 }

@@ -10,10 +10,11 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     $searchQuery = " WHERE 
         p.nombre LIKE '%$searchTerm%' 
         OR c.nombre LIKE '%$searchTerm%' 
+        OR p.codigo LIKE '%$searchTerm%'
         OR m.nombre LIKE '%$searchTerm%'";
 }
 
-$sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
+$sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_medida,
                p.id_marca, m.nombre AS marca, p.nombre, 
                p.precio, p.stock, p.ubicacion, p.fecha_ingreso, 
                p.estado, p.imagen, c.nombre AS categoria, c.id_categoria
@@ -82,6 +83,10 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                             }
                             ?>
                         </select>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="codigo">Código del producto</label>
+                        <input type="text" name="codigo" id="codigo" class="form-control" required>
                     </div>
 
                     <div class="form-group mb-3">
@@ -170,6 +175,11 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                         </select>
                     </div>
 
+                     <div class="form-group mb-3">
+                        <label for="edit_codigo">Código del producto</label>
+                        <input type="text" name="codigo" id="edit_codigo" class="form-control" required>
+                    </div>
+
                     <div class="form-group mb-3">
                         <label for="edit_nombre">Nombre del producto</label>
                         <input type="text" name="nombre" id="edit_nombre" class="form-control" required>
@@ -238,6 +248,7 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
         <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
             <thead class="bg-primary text-white">
                 <tr>
+                    <th>Código</th>
                     <th>Categoría</th>
                     <th>Marca</th>
                     <th class="text-start">Producto</th>
@@ -258,6 +269,7 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
                         echo "<tr>";
+                        echo "<td>" . htmlspecialchars($row['codigo']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['categoria']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['marca']) . "</td>";
                         echo "<td class='text-start'>" . htmlspecialchars($row['nombre']) . "</td>";
@@ -317,6 +329,7 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
     function openEditModal(productsData) {
         $('#edit_id_producto').val(productsData.id_producto);
         $('#edit_id_categoria').val(productsData.id_categoria);
+        $('#edit_codigo').val(productsData.codigo);
         $('#edit_unidad').val(productsData.id_unidad_medida);
         $('#edit_marca').val(productsData.id_marca);
         $('#edit_nombre').val(productsData.nombre); 

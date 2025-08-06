@@ -7,10 +7,11 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     $searchQuery = " WHERE 
         p.nombre LIKE '%$searchTerm%' 
         OR c.nombre LIKE '%$searchTerm%' 
+        OR p.codigo LIKE '%$searchTerm%'
         OR m.nombre LIKE '%$searchTerm%'";
 }
 
-$sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
+$sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_medida,
                p.id_marca, m.nombre AS marca, p.nombre, 
                p.precio, p.stock, p.ubicacion, p.fecha_ingreso, 
                p.estado, p.imagen, c.nombre AS categoria, c.id_categoria
@@ -25,6 +26,7 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
                         echo "<tr>";
+                        echo "<td>" . htmlspecialchars($row['codigo']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['categoria']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['marca']) . "</td>";
                         echo "<td class='text-start'>" . htmlspecialchars($row['nombre']) . "</td>";
