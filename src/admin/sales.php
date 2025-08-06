@@ -62,6 +62,8 @@ if ($id_usuario) {
 
     <div id="Alert" class="container mt-3"></div>
 
+    <h1 class = "text-center custom-orange-text">Realizar Venta</h1>
+
     <div class="text-end my-3">
         <a href="view_sales.php" class="btn custom-orange-btn text-white">
             Ver Ventas
@@ -83,7 +85,6 @@ if ($id_usuario) {
                 </select>
             </div>
 
-            <!-- Select de direcciones (solo si se seleccionó usuario) -->
             <div class="col-sm-4">
                 <?php if (!empty($id_usuario)): ?>
                     <label for="id_direccion" class="form-label">Seleccionar Dirección:</label>
@@ -111,7 +112,7 @@ if ($id_usuario) {
             <span class="input-group-text bg-custom-orange text-white">
                 <i class="fas fa-barcode"></i>
             </span>
-            <input type="text" name="product_code" id="product_code" class="form-control" placeholder="Agregar producto por código...">
+            <input type="text" name="product_code" id="product_code" class="form-control" placeholder="Agregar producto por código..." autofocus>
         </div>
     </div>
 </form>
