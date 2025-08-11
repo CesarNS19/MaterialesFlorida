@@ -74,7 +74,7 @@ $title = "La Florida ┃ Categorias";
 <div class="modal fade" id="deleteCategoriesModal" tabindex="-1" aria-labelledby="deleteCategoriesModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
+      <div class="modal-header bg-custom-orange text-white">
         <h5 class="modal-title" id="deleteCategoriesModalLabel">Confirmar Eliminación</h5>
       </div>
       <form action="categories/delete_categories.php" method="POST">
@@ -84,7 +84,7 @@ $title = "La Florida ┃ Categorias";
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-danger">Eliminar</button>
+          <button type="submit" class="btn custom-orange-btn text-white">Eliminar</button>
       </div>
       </form>
     </div>

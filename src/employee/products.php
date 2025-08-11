@@ -16,7 +16,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 
 $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_medida,
                p.id_marca, m.nombre AS marca, p.nombre, 
-               p.precio, p.stock, p.ubicacion, p.fecha_ingreso, 
+               p.precio, p.precio_pieza, p.stock, p.ubicacion, p.fecha_ingreso, 
                p.estado, p.imagen, c.nombre AS categoria, c.id_categoria
         FROM productos p
         JOIN marcas m ON p.id_marca = m.id_marca
@@ -97,6 +97,11 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
                     <div class="form-group mb-3">
                         <label for="precio">Precio</label>
                         <input type="number" name="precio" id="precio" class="form-control" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="precio_pz">Precio por pieza</label>
+                        <input type="number" name="precio_pz" id="precio_pz" class="form-control" required>
                     </div>
 
                     <div class="form-group mb-3">
@@ -191,6 +196,11 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
                     </div>
 
                     <div class="form-group mb-3">
+                        <label for="edit_precio_pz">Precio del Producto Por Pieza</label>
+                        <input type="number" name="precio_pz" id="edit_precio_pz" class="form-control" required>
+                    </div>
+
+                    <div class="form-group mb-3">
                         <label for="edit_ubicacion">Ubicación</label>
                         <input type="text" name="ubicacion" id="edit_ubicacion" class="form-control" required>
                     </div>
@@ -244,6 +254,7 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
         <button class="btn custom-orange-btn text-white" data-bs-toggle="modal" data-bs-target="#addProductsModal" style="float: right; margin: 10px;">
             Agregar Producto
         </button>
+        <a href="units_of_measure.php" class="btn custom-orange-btn text-white">Ver Unidades Medida</a>
     <div class="table-responsive">
         <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
             <thead class="bg-primary text-white">
@@ -255,6 +266,7 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
                     <th>U. Medida</th>
                     <th>Existencia</th>
                     <th>Precio</th>
+                    <th>Precio Pz</th>
                     <th>Fecha Ingreso</th>
                     <th>Ubicación</th>
                     <th>Estado</th>
@@ -276,6 +288,7 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
                         echo "<td>" . htmlspecialchars($row['unidad_medida']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['stock']) . "</td>";
                         echo "<td class='text-success fw-bold'>$" . htmlspecialchars($row['precio']) . "</td>";
+                        echo "<td class='text-success fw-bold'>$" . htmlspecialchars($row['precio_pieza']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['fecha_ingreso']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['ubicacion']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['estado']) . "</td>";
@@ -334,6 +347,7 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
         $('#edit_marca').val(productsData.id_marca);
         $('#edit_nombre').val(productsData.nombre); 
         $('#edit_precio').val(productsData.precio);
+         $('#edit_precio_pz').val(productsData.precio_pieza);
         $('#edit_ubicacion').val(productsData.ubicacion);
         $('#edit_estado').val(productsData.estado);
         $('#current_image').attr('src', '../../img/' + productsData.imagen);

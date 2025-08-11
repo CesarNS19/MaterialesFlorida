@@ -5,7 +5,7 @@ require '../../../mysql/connection.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'])) {
     $id_usuario = intval($_POST['id_usuario']);
 
-    $carrito_sql = "SELECT c.id_producto, c.cantidad, c.precio, c.subtotal
+    $carrito_sql = "SELECT c.id_producto, c.cantidad, c.unidad_seleccionada, c.precio, c.subtotal
                     FROM carrito c
                     WHERE c.id_usuario = $id_usuario";
     $result = $conn->query($carrito_sql);
@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'])) {
         $total += $row['subtotal'];
     }
 
+    date_default_timezone_set('America/Mexico_City');
     $fecha = date('Y-m-d H:i:s');
     $insertVenta = "INSERT INTO ventas (id_usuario, fecha, total) VALUES ($id_usuario, '$fecha', $total)";
 
@@ -35,11 +36,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'])) {
         foreach ($productos as $p) {
             $id_producto = $p['id_producto'];
             $cantidad = $p['cantidad'];
+            $unidad_seleccionada = $conn->real_escape_string($p['unidad_seleccionada']);
             $precio_unitario = $p['precio'];
             $subtotal = $p['subtotal'];
 
-            $insertDetalle = "INSERT INTO detalle_venta (id_producto, id_venta, cantidad, precio_unitario, subtotal)
-                              VALUES ($id_producto, $id_venta, $cantidad, $precio_unitario, $subtotal)";
+            $insertDetalle = "INSERT INTO detalle_venta (id_producto, id_venta, cantidad, unidad_seleccionada, precio_unitario, subtotal)
+                              VALUES ($id_producto, $id_venta, $cantidad, '$unidad_seleccionada', $precio_unitario, $subtotal)";
 
             if (!$conn->query($insertDetalle)) {
                 $ok = false;
@@ -69,6 +71,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'])) {
     $_SESSION['status_message'] = "Datos inválidos para procesar la venta.";
     $_SESSION['status_type'] = "error";
     header("Location: ../sales.php");
-    
     exit;
 }

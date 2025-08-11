@@ -30,6 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmtStock->bind_param("di", $cantidad, $id_producto);
             $stmtStock->execute();
 
+            $sqlPrecioCompra = "UPDATE productos SET precio_compra = ? WHERE id_producto = ?";
+            $stmtPrecioCompra = $conn->prepare($sqlPrecioCompra);
+            $stmtPrecioCompra->bind_param("di", $precio, $id_producto);
+            $stmtPrecioCompra->execute();
+
             $conn->commit();
 
             $_SESSION['status_message'] = "Compra registrada correctamente.";
@@ -51,3 +56,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 header("Location: ../add_shopping.php");
 exit;
+?>

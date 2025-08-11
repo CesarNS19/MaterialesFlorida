@@ -168,13 +168,18 @@ $result = $conn->query($sql);
             echo "<div class='row row-cols-1 row-cols-md-2 g-4 mt-2'>";
             while ($venta = $result->fetch_assoc()) {
                 $fecha = new DateTime($venta['fecha']);
-                $fecha_formateada = $fecha->format('d') . " de " . $meses_en[$fecha->format('F')] . " de " . $fecha->format('Y');
+                $fecha_formateada = 
+                    "<i class='fas fa-calendar-alt me-1'></i><strong>Fecha:</strong> " . 
+                    $fecha->format('d') . " de " . $meses_en[$fecha->format('F')] . " de " . $fecha->format('Y') .
+                    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" .
+                    "<i class='fas fa-clock ms-4 me-1'></i><strong>Hora:</strong> " . 
+                    $fecha->format('g:i A');
 
                 echo "<div class='col'>";
                 echo "<div class='card border border-light shadow-sm rounded-4 h-100'>";
-                echo "<div class='card-header text-center fw-semibold rounded-top-4'><i class='fas fa-receipt me-2'></i> Venta Realizada</div>";
+                echo "<div class='card-header text-center fw-semibold rounded-top-4 bg-custom-orange text-white'><i class='fas fa-receipt me-2'></i> Venta Realizada</div>";
                 echo "<div class='card-body px-4 py-3 d-flex flex-column justify-content-between h-100'>";
-                echo "<div class='d-flex justify-content-between mb-3 text-muted small'><div><i class='fas fa-calendar-alt me-1'></i> $fecha_formateada</div></div>";
+                echo "<div class='d-flex justify-content-between mb-3 text-muted small'><div>$fecha_formateada</div></div>";
                 echo "<div class='mb-3'><div class='fw-semibold text-body mb-1'><i class='fas fa-user me-2'></i>Cliente</div><div class='text-muted'>{$venta['nombre_completo']}</div></div>";
                 echo "<div class='row mb-3'><div class='col-6'><div class='fw-semibold text-body'><i class='fas fa-box me-2'></i>Artículos: {$venta['total_articulos']}</div></div>";
                 echo "<div class='col-6 text-end'><div class='fw-bold'>Total: \$" . number_format($venta['total_compra'], 2) . "</div></div></div>";
@@ -205,8 +210,9 @@ $result = $conn->query($sql);
 </div>
 
 <script>
-    function verTicket(idVenta) {
-        window.location.href = 'sales/ticket_generate.php?id_venta=' + idVenta;
+     function verTicket(idVenta) {
+        const pdfUrl = `../../pdf/venta_${idVenta}.pdf`;
+        window.open(pdfUrl, '_blank');
     }
 
     document.addEventListener('DOMContentLoaded', function () {

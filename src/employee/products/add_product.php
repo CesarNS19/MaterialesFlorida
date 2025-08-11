@@ -10,6 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $codigo = $_POST['codigo'];
     $nombre = $_POST['nombre'];
     $precio = $_POST['precio'];
+    $precio_pz = $_POST['precio_pz'];
     $stock = $_POST['stock'];
     $ubicacion = $_POST['ubicacion'];
     $fecha_ingreso = date('Y-m-d');
@@ -27,11 +28,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $relative_path = $filename;
 
                 $sql = "INSERT INTO productos 
-                        (id_unidad_medida, id_marca, id_categoria, codigo, nombre, precio, stock, ubicacion, fecha_ingreso, estado, imagen) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        (id_unidad_medida, id_marca, id_categoria, codigo, nombre, precio, precio_pieza, stock, ubicacion, fecha_ingreso, estado, imagen) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("iiissdissss", $id_unidad_medida, $id_marca, $id_categoria, $codigo, $nombre, $precio, $stock, $ubicacion, $fecha_ingreso, $estado, $relative_path);
+                $stmt->bind_param("iiissddissss", $id_unidad_medida, $id_marca, $id_categoria, $codigo, $nombre, $precio, $precio_pz, $stock, $ubicacion, $fecha_ingreso, $estado, $relative_path);
 
                 if ($stmt->execute()) {
                     $_SESSION['status_message'] = "Producto agregado exitosamente";

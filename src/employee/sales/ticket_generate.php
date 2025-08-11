@@ -51,7 +51,7 @@ if (!$resultDireccion) {
 $direccion = $resultDireccion->fetch_assoc();
 $direccionCompleta = $direccion ? $direccion['direccion_completa'] : 'No disponible';
 
-$sqlDetalles = "SELECT dv.*, p.nombre AS producto
+$sqlDetalles = "SELECT dv.*, p.nombre AS producto, dv.unidad_seleccionada
                 FROM detalle_venta dv
                 JOIN productos p ON dv.id_producto = p.id_producto
                 WHERE dv.id_venta = $id_venta";
@@ -98,26 +98,30 @@ $pdf->Cell(0,6, toIso('PEDIDO No: ') . str_pad($venta['id_venta'],4,'0',STR_PAD_
 
 $pdf->Cell(0,6, toIso('CLIENTE: ') . toIso($venta['cliente']),0,1);
 $pdf->Cell(0,6, toIso('DIRECCIÓN: ') . toIso($direccionCompleta),0,1);
-$pdf->Cell(0,6,toIso('POBLACIÓN: ') . toIso($venta['telefono']),0,1);
+$pdf->Cell(0,6,toIso('TELEFONO: ') . toIso($venta['telefono']),0,1);
 $pdf->Ln(4);
 
 $pdf->SetFont('Arial','B',10);
-$pdf->Cell(20,8,toIso('CANT.'),1,0,'C');
-$pdf->Cell(100,8,toIso('DESCRIPCIÓN'),1,0,'C');
-$pdf->Cell(35,8,toIso('PRECIO U.'),1,0,'C');
-$pdf->Cell(35,8,toIso('IMPORTE'),1,1,'C');
+$pdf->Cell(70,8,toIso('DESCRIPCIÓN'),1,0,'C');
+$pdf->Cell(40,8,toIso('UNIDAD MEDIDA'),1,0,'C');
+$pdf->Cell(20,8,toIso('CANTIDAD'),1,0,'C');
+$pdf->Cell(30,8,toIso('PRECIO U.'),1,0,'C');
+$pdf->Cell(30,8,toIso('IMPORTE'),1,1,'C');
 
 $pdf->SetFont('Arial','',10);
 while($row = $resultDetalles->fetch_assoc()){
+    $unidad = !empty($row['unidad_seleccionada']) ? $row['unidad_seleccionada'] : '-';
+
+    $pdf->Cell(70,8,toIso($row['producto']),1);
+    $pdf->Cell(40,8,toIso($unidad),1,0,'C');
     $pdf->Cell(20,8,$row['cantidad'],1,0,'C');
-    $pdf->Cell(100,8,toIso($row['producto']),1);
-    $pdf->Cell(35,8,'$'.number_format($row['precio_unitario'],2),1,0,'R');
-    $pdf->Cell(35,8,'$'.number_format($row['subtotal'],2),1,1,'R');
+    $pdf->Cell(30,8,'$'.number_format($row['precio_unitario'],2),1,0,'R');
+    $pdf->Cell(30,8,'$'.number_format($row['subtotal'],2),1,1,'R');
 }
 
 $pdf->SetFont('Arial','B',10);
-$pdf->Cell(155,8,toIso('TOTAL'),1,0,'R');
-$pdf->Cell(35,8,'$'.number_format($venta['total'],2),1,1,'R');
+$pdf->Cell(160,8,toIso('TOTAL'),1,0,'R');
+$pdf->Cell(30,8,'$'.number_format($venta['total'],2),1,1,'R');
 
 $pdf->Ln(8);
 $pdf->SetFont('Arial','',9);
@@ -128,5 +132,15 @@ $pdf->MultiCell(0,5,toIso(
 $pdf->Ln(8);
 $pdf->Cell(0,6,toIso('FIRMA DE CONFORMIDAD: ____________________________'),0,1,'R');
 
-$pdf->Output("I","pedido_$id_venta.pdf");
+$pdfDir = realpath(__DIR__ . '/../../../pdf');
+if (!is_dir($pdfDir)) {
+    mkdir($pdfDir, 0777, true);
+}
+$pdfFile = $pdfDir . "/venta_$id_venta.pdf";
+$pdf->Output("F", $pdfFile);
+
+header('Content-Type: application/pdf');
+header('Content-Disposition: inline; filename="venta_'.$id_venta.'.pdf"');
+readfile($pdfFile);
+
 ob_end_flush();

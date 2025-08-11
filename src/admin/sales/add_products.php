@@ -30,6 +30,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["product_code"])) {
             exit;
         }
 
+        $queryUnidadBase = $conn->prepare("
+            SELECT um.nombre 
+            FROM productos p
+            JOIN unidades_medida um ON p.id_unidad_medida = um.id_unidad_medida
+            WHERE p.id_producto = ?
+            LIMIT 1
+        ");
+        $queryUnidadBase->bind_param("i", $id_producto);
+        $queryUnidadBase->execute();
+        $resultUnidadBase = $queryUnidadBase->get_result();
+
+        if ($rowUnidadBase = $resultUnidadBase->fetch_assoc()) {
+            $unidad_seleccionada = $rowUnidadBase['nombre'];
+        } else {
+            $unidad_seleccionada = 'unidad';
+        }
+
         $check = $conn->prepare("SELECT cantidad FROM carrito WHERE id_producto = ? AND id_usuario = ?");
         $check->bind_param("ii", $id_producto, $id_usuario);
         $check->execute();
@@ -49,8 +66,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["product_code"])) {
 
             $subtotal = $precio * $nueva_cantidad;
 
-            $update = $conn->prepare("UPDATE carrito SET cantidad = ?, subtotal = ? WHERE id_producto = ? AND id_usuario = ?");
-            $update->bind_param("idii", $nueva_cantidad, $subtotal, $id_producto, $id_usuario);
+            $update = $conn->prepare("UPDATE carrito SET cantidad = ?, subtotal = ?, unidad_seleccionada = ? WHERE id_producto = ? AND id_usuario = ?");
+            $update->bind_param("idsii", $nueva_cantidad, $subtotal, $unidad_seleccionada, $id_producto, $id_usuario);
             $update->execute();
 
             $new_stock = $stock - 1;
@@ -64,8 +81,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["product_code"])) {
             $cantidad = 1;
             $subtotal = $precio;
 
-            $insert = $conn->prepare("INSERT INTO carrito (id_producto, id_usuario, cantidad, precio, subtotal) VALUES (?, ?, ?, ?, ?)");
-            $insert->bind_param("iiddd", $id_producto, $id_usuario, $cantidad, $precio, $subtotal);
+            $insert = $conn->prepare("INSERT INTO carrito (id_producto, id_usuario, cantidad, precio, subtotal, unidad_seleccionada) VALUES (?, ?, ?, ?, ?, ?)");
+            $insert->bind_param("iiidds", $id_producto, $id_usuario, $cantidad, $precio, $subtotal, $unidad_seleccionada);
             $insert->execute();
 
             $new_stock = $stock - 1;

@@ -6,6 +6,8 @@ $title = "La Florida ┃ Ventas";
 
 $id_usuario = isset($_GET["id_usuario"]) ? intval($_GET["id_usuario"]) : null;
 
+$total = 0;
+
 $usuarios_result = $conn->query("SELECT u.id_usuario, CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo
                                  FROM usuarios u
                                  JOIN perfil p ON u.id_perfil = p.id_perfil
@@ -21,33 +23,55 @@ if (!empty($id_usuario)) {
 }
 
 $nombre_completo = "";
-$result = false;
+if ($id_usuario) {
+    $resNombre = $conn->query("SELECT CONCAT(nombre, ' ', apellido_paterno, ' ', apellido_materno) AS nombre_completo FROM usuarios WHERE id_usuario = $id_usuario");
+    if ($resNombre && $rowNombre = $resNombre->fetch_assoc()) {
+        $nombre_completo = $rowNombre['nombre_completo'];
+    }
+}
 
+$result = false;
+$productos_carrito = [];
 if ($id_usuario) {
     $query = "SELECT 
-                CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo,
                 c.id_carrito,
+                p.id_producto,
                 p.nombre AS nombre_producto,
                 p.stock,
+                p.id_unidad_medida,
                 um.nombre AS unidad_medida,
                 c.cantidad,
                 c.precio,
+                p.precio AS precio_normal,
+                p.precio_pieza,
                 c.subtotal,
                 p.imagen,
-                p.codigo
+                p.codigo,
+                c.unidad_seleccionada
             FROM carrito c
             JOIN productos p ON c.id_producto = p.id_producto
-            JOIN usuarios u ON c.id_usuario = u.id_usuario
             JOIN unidades_medida um ON p.id_unidad_medida = um.id_unidad_medida
             WHERE c.id_usuario = $id_usuario";
 
     $result = $conn->query($query);
 
-    if ($row = $result->fetch_assoc()) {
-        $nombre_completo = $row["nombre_completo"];
-    }
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $unidadesAlternativas = [];
+            $sqlUnidad = "SELECT unidad_medida, factor FROM unidades_conversion WHERE id_producto = " . intval($row['id_producto']);
+            $resUnidades = $conn->query($sqlUnidad);
+            if ($resUnidades) {
+                while($u = $resUnidades->fetch_assoc()){
+                    $unidadesAlternativas[$u['unidad_medida']] = $u['factor'];
+                }
+            }
 
-    $result->data_seek(0);
+            $row['unidades_alternativas'] = $unidadesAlternativas;
+            $productos_carrito[] = $row;
+
+            $total += $row['subtotal'];
+        }
+    }
 }
 ?>
 
@@ -169,6 +193,25 @@ if ($id_usuario) {
   </div>
 </div>
 
+<!-- Modal de confirmación de venta -->
+<div class="modal fade" id="confirmSaleModal" tabindex="-1" aria-labelledby="confirmSaleLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-custom-orange text-white">
+        <h5 class="modal-title" id="confirmSaleLabel">Confirmar Venta</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body text-center">
+        ¿Confirmas realizar la venta?
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn custom-orange-btn text-white" id="btnConfirmSale">Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Modal para Eliminar -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
@@ -207,7 +250,6 @@ if ($id_usuario) {
                         <th>Código</th>
                         <th>Imagen</th>
                         <th>Producto</th>
-                        <th>Unidad de Medida</th>
                         <th>Existencia</th>
                         <th>Cantidad</th>
                         <th>Precio</th>
@@ -216,27 +258,49 @@ if ($id_usuario) {
                     </tr>
                 </thead>
                 <tbody id="products-container">
-
-                    <?php if ($id_usuario && $result && $result->num_rows > 0): ?>
-                        <?php while ($row = $result->fetch_assoc()): ?>
+                    <?php if ($id_usuario && count($productos_carrito) > 0): ?>
+                        <?php foreach ($productos_carrito as $row): ?>
+                            <?php
+                                $unidadBase = $row['unidad_medida'];
+                                $unidad_seleccionada = !empty($row['unidad_seleccionada']) ? $row['unidad_seleccionada'] : 'normal';
+                                $unidadesAlternativas = $row['unidades_alternativas'];
+                            ?>
                             <tr>
                                 <td><?= htmlspecialchars($row['codigo']) ?></td>
                                 <td>
                                     <img src='../../img/<?= htmlspecialchars($row['imagen']) ?>' class='rounded' width='100px' height='60px' alt='Imágen Producto'>
                                 </td>
                                 <td><?= htmlspecialchars($row['nombre_producto']) ?></td>
-                                <td><?= htmlspecialchars($row['unidad_medida']) ?></td>
                                 <td><?= htmlspecialchars($row['stock']) ?></td>
                                 <td>
                                     <form action="sales/update_quantity.php" method="POST" class="d-flex justify-content-center align-items-center">
                                         <input type="hidden" name="id_carrito" value="<?= $row['id_carrito'] ?>">
                                         <input type="hidden" name="id_usuario" value="<?= $id_usuario ?>">
-                                        <input type="text" name="cantidad" value="<?= $row['cantidad'] ?>"
-                                            class="form-control text-center" style="width:70px;" required>
+
+                                        <input type="number" name="cantidad" value="<?= $row['cantidad'] ?>" class="form-control text-center" style="width:70px;" min="0.01" step="0.01" required>
+
+                                        <select name="unidad_seleccionada" class="form-select ms-2" style="width:120px;">
+                                            <option value="normal" <?= ($unidad_seleccionada === 'normal') ? 'selected' : '' ?>>
+                                                <?= htmlspecialchars($unidadBase) ?>
+                                            </option>
+                                            <?php foreach ($unidadesAlternativas as $unidad => $factor): ?>
+                                                <option value="<?= htmlspecialchars($unidad) ?>" <?= ($unidad_seleccionada === $unidad) ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($unidad) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+
+                                        <button type="submit" class="btn btn-sm btn-outline-primary ms-2" title="Actualizar cantidad y unidad">
+                                            <i class="fas fa-sync-alt"></i>
+                                        </button>
                                     </form>
                                 </td>
-                                <td>$<?= htmlspecialchars($row['precio']) ?></td>
-                                <td>$<?= htmlspecialchars($row['subtotal']) ?></td>
+                                <td class="precio" data-precio-normal="<?= $row['precio_normal'] ?>" data-precio-pieza="<?= $row['precio_pieza'] ?>">
+                                    $<?= number_format($row['precio'], 2) ?>
+                                </td>
+                                <td class="subtotal">
+                                    $<?= number_format($row['subtotal'], 2) ?>
+                                </td>
                                 <td>
                                     <button 
                                         class='btn btn-sm btn-outline-danger me-2'
@@ -247,28 +311,31 @@ if ($id_usuario) {
                                     </button>
                                 </td>
                             </tr>
-                        <?php endwhile; ?>
-                    <?php elseif ($id_usuario): ?>
+                        <?php endforeach; ?>
+                    <?php else: ?>
                         <tr>
-                            <td colspan="8">No hay productos en el carrito.</td>
+                            <td colspan="9">No hay productos en el carrito.</td>
                         </tr>
                     <?php endif; ?>
-
                 </tbody>
+
             </table>
+        </div>
+
+        <div>
+            <p class="text-end" style="font-size: 20px;">Total: $<?= number_format($total, 2) ?></p>
         </div>
 
         <?php if ($id_usuario): ?>
             <div class="text-end my-3">
-                <form action="sales/sales_process.php" method="POST" onsubmit="return confirm('¿Confirmas realizar la venta?');">
+                <form id="saleForm" action="sales/sales_process.php" method="POST">
                     <input type="hidden" name="id_usuario" value="<?= $id_usuario ?>">
-                    <button type="submit" class="btn custom-orange-btn btn-md text-white">
+                    <button type="button" class="btn custom-orange-btn btn-sm text-white" id="btnOpenConfirm">
                         <i class="fas fa-cash-register me-2"></i> Realizar Venta
                     </button>
                 </form>
             </div>
         <?php endif; ?>
-
     </main>
 </div>
 
@@ -279,23 +346,45 @@ if ($id_usuario) {
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const direccionSelect = document.getElementById('id_direccion');
-        const usuarioSelect = document.getElementById('id_usuario');
+        const btnOpenConfirm = document.getElementById('btnOpenConfirm');
+        const btnConfirmSale = document.getElementById('btnConfirmSale');
+        const saleForm = document.getElementById('saleForm');
+        const confirmSaleModal = new bootstrap.Modal(document.getElementById('confirmSaleModal'));
 
-        if (direccionSelect) {
-            direccionSelect.addEventListener('change', function() {
-                if (this.value === 'nueva') {
-                    if (usuarioSelect.value === '') {
-                        alert('Primero selecciona un cliente para agregar dirección.');
-                        this.value = '';
-                        return;
-                    }
-                    const modal = new bootstrap.Modal(document.getElementById('addModal'));
-                    modal.show();
-                    this.value = '';
-                }
-            });
+        btnOpenConfirm.addEventListener('click', function() {
+            confirmSaleModal.show();
+        });
+
+        btnConfirmSale.addEventListener('click', function() {
+            saleForm.submit();
+        });
+    });
+
+    document.querySelectorAll('form.update-quantity-form').forEach(form => {
+        const cantidadInput = form.querySelector('input[name="cantidad"]');
+        const unidadSelect = form.querySelector('select[name="unidad_seleccionada"]');
+        const precioTd = form.closest('tr').querySelector('.precio');
+        const subtotalTd = form.closest('tr').querySelector('.subtotal');
+
+        function actualizarPrecio() {
+            const cantidad = parseFloat(cantidadInput.value);
+            const unidad = unidadSelect.value;
+            const precioNormal = parseFloat(precioTd.dataset.precioNormal);
+            const precioPieza = parseFloat(precioTd.dataset.precioPieza);
+
+            let precio = precioNormal;
+
+            if (unidad === 'pieza' || unidad === 'carretilla' || unidad === 'bulto' || unidad === 'kilogramos') {
+            precio = precioPieza;
+            }
+
+            precioTd.textContent = `$${precio.toFixed(2)}`;
+            const subtotal = cantidad * precio;
+            subtotalTd.textContent = `$${subtotal.toFixed(2)}`;
         }
+
+        cantidadInput.addEventListener('input', actualizarPrecio);
+        unidadSelect.addEventListener('change', actualizarPrecio);
     });
 
     function mostrarToast(titulo, mensaje, tipo) {

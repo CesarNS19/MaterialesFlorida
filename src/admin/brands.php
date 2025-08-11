@@ -7,7 +7,7 @@ $title = "La Florida ┃ Marcas";
 $searchQuery = "";
 if (isset($_GET['search']) && !empty($_GET['search'])) {
     $searchTerm = $_GET['search'];
-    $searchQuery = " WHERE p.nombre LIKE '%" . $conn->real_escape_string($searchTerm) . "%' ";
+    $searchQuery = " WHERE nombre LIKE '%" . $conn->real_escape_string($searchTerm) . "%' ";
 }
 
 $sql = "SELECT * FROM marcas". $searchQuery;
@@ -82,7 +82,7 @@ $sql = "SELECT * FROM marcas". $searchQuery;
 <div class="modal fade" id="deleteBrandsModal" tabindex="-1" aria-labelledby="deleteBrandsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
+      <div class="modal-header bg-custom-orange text-white">
         <h5 class="modal-title" id="deleteBrandsModalLabel">Confirmar Eliminación</h5>
       </div>
       <form action="brands/delete_brands.php" method="POST">
@@ -92,7 +92,7 @@ $sql = "SELECT * FROM marcas". $searchQuery;
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-danger">Eliminar</button>
+          <button type="submit" class="btn custom-orange-btn text-white">Eliminar</button>
       </div>
       </form>
     </div>
