@@ -129,15 +129,16 @@ if ($id_usuario) {
     </form>
 
 <!-- Formulario de Búsqueda -->
-<form id="productSearchForm" class="row g-2" action="sales/add_products.php" method="POST">
-    <input type="hidden" name="id_usuario" value="<?= $id_usuario ?>">
-    <div class="col-md-8">
+<form id="productSearchForm" class="row g-2">
+    <input type="hidden" name="id_usuario" id="id_usuario_input" value="<?= $id_usuario ?>">
+    <div class="col-md-8 position-relative">
         <div class="input-group">
             <span class="input-group-text bg-custom-orange text-white">
                 <i class="fas fa-barcode"></i>
             </span>
-            <input type="text" name="product_code" id="product_code" class="form-control" placeholder="Agregar producto por código..." autofocus>
+            <input type="text" id="search_query" class="form-control" placeholder="Buscar producto por código o nombre..." autocomplete="off">
         </div>
+        <div id="suggestions" class="list-group position-absolute w-100" style="z-index:1000;"></div>
     </div>
 </form>
 
@@ -232,9 +233,6 @@ if ($id_usuario) {
 </div>
 
 <!-- Carrito de productos -->
-<div class="container-fluid d-flex">
-    <main class="flex-fill p-4 overflow-auto" id="main-content">
-
         <h2 class="fw-bold custom-orange-text text-center">
             <?php if ($id_usuario): ?>
                 Productos para <?= htmlspecialchars($nombre_completo) ?>
@@ -336,14 +334,30 @@ if ($id_usuario) {
                 </form>
             </div>
         <?php endif; ?>
-    </main>
-</div>
 
 <script>
     function eliminarProducto(id_carrito, id_usuario) {
         const btnDelete = document.getElementById("btnConfirmDelete");
         btnDelete.href = "sales/delete_product.php?id=" + id_carrito + "&id_usuario=" + id_usuario;
     }
+
+     const direccionSelect = document.getElementById('id_direccion');
+        const usuarioSelect = document.getElementById('id_usuario');
+
+        if (direccionSelect) {
+            direccionSelect.addEventListener('change', function() {
+                if (this.value === 'nueva') {
+                    if (usuarioSelect.value === '') {
+                        alert('Primero selecciona un cliente para agregar dirección.');
+                        this.value = '';
+                        return;
+                    }
+                    const modal = new bootstrap.Modal(document.getElementById('addModal'));
+                    modal.show();
+                    this.value = '';
+                }
+            });
+        };
 
     document.addEventListener('DOMContentLoaded', function() {
         const btnOpenConfirm = document.getElementById('btnOpenConfirm');
@@ -385,6 +399,56 @@ if ($id_usuario) {
 
         cantidadInput.addEventListener('input', actualizarPrecio);
         unidadSelect.addEventListener('change', actualizarPrecio);
+    });
+
+    $(document).ready(function() {
+        const $search = $('#search_query');
+        const $suggestions = $('#suggestions');
+        const id_usuario = $('#id_usuario_input').val();
+
+        $search.on('input', function() {
+            const query = $(this).val().trim();
+            if (query.length === 0) {
+                $suggestions.hide();
+                return;
+            }
+
+            $.getJSON('sales/search_products.php', { query, id_usuario }, function(data) {
+                $suggestions.empty();
+                if (data.length > 0) {
+                    data.forEach(prod => {
+                        const item = $(`
+                            <button type="button" class="list-group-item list-group-item-action d-flex align-items-center">
+                                <img src='../../img/${prod.imagen}' width='50' class='me-2 rounded'>
+                                <div>
+                                    <strong>${prod.nombre}</strong><br>
+                                    <small>Código: ${prod.codigo} | Stock: ${prod.stock}</small>
+                                </div>
+                            </button>
+                        `);
+                        item.on('click', function() {
+                            $('<form>', {
+                                method: 'POST',
+                                action: 'sales/add_products.php'
+                            }).append(
+                                $('<input>', { type: 'hidden', name: 'id_usuario', value: id_usuario }),
+                                $('<input>', { type: 'hidden', name: 'id_producto', value: prod.id_producto })
+                            ).appendTo('body').submit();
+                        });
+                        $suggestions.append(item);
+                    });
+                    $suggestions.show();
+                } else {
+                    $suggestions.hide();
+                }
+            });
+        });
+
+        $(document).click(function(e) {
+            if (!$(e.target).closest('#search_query, #suggestions').length) {
+                $suggestions.hide();
+            }
+        });
     });
 
     function mostrarToast(titulo, mensaje, tipo) {

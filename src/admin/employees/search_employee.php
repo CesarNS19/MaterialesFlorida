@@ -8,7 +8,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 }
 
 $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.email, 
-               p.estatus AS estado, p.nombre AS perfil, p.id_perfil, 
+               u.estatus AS estado, p.nombre AS perfil, p.id_perfil, 
                u.id_direccion, d.ciudad
         FROM usuarios u
         JOIN perfil p ON u.id_perfil = p.id_perfil
