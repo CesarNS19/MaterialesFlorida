@@ -1,17 +1,44 @@
-<?php 
+<?php
 session_start();
 require '../../mysql/connection.php';
 require 'slidebar.php'; 
 $title = "La Florida ┃ Ventas";
 
+$usuario_logueado = isset($_SESSION['id_usuario']) ? intval($_SESSION['id_usuario']) : null;
+
+if (!$usuario_logueado) {
+    $_SESSION['status_message'] = "Debes iniciar sesión para acceder a las ventas.";
+    $_SESSION['status_type'] = "warning";
+    header("Location: login.php");
+    exit();
+}
+
 $id_usuario = isset($_GET["id_usuario"]) ? intval($_GET["id_usuario"]) : null;
 
-$total = 0;
+$id_caja = null;
+$sql_caja = "SELECT id_caja FROM cajas WHERE id_usuario = ? AND estado = 'abierta' LIMIT 1";
+$stmt_caja = $conn->prepare($sql_caja);
+$stmt_caja->bind_param('i', $usuario_logueado);
+$stmt_caja->execute();
+$resultado_caja = $stmt_caja->get_result();
+if ($resultado_caja && $row_caja = $resultado_caja->fetch_assoc()) {
+    $id_caja = $row_caja['id_caja'];
+}
+$stmt_caja->close();
 
-$usuarios_result = $conn->query("SELECT u.id_usuario, CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo
-                                 FROM usuarios u
-                                 JOIN perfil p ON u.id_perfil = p.id_perfil
-                                 WHERE p.nombre = 'Cliente'");
+$nombre_completo = "";
+if ($id_usuario) {
+    $resNombre = $conn->query("SELECT CONCAT(nombre, ' ', apellido_paterno, ' ', apellido_materno) AS nombre_completo FROM usuarios WHERE id_usuario = $id_usuario");
+    if ($resNombre && $rowNombre = $resNombre->fetch_assoc()) {
+        $nombre_completo = $rowNombre['nombre_completo'];
+    }
+}
+$usuarios_result = $conn->query("
+    SELECT u.id_usuario, CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo
+    FROM usuarios u
+    JOIN perfil p ON u.id_perfil = p.id_perfil
+    WHERE p.nombre = 'Cliente'
+");
 
 $direcciones_result = null;
 if (!empty($id_usuario)) {
@@ -22,16 +49,9 @@ if (!empty($id_usuario)) {
     ");
 }
 
-$nombre_completo = "";
-if ($id_usuario) {
-    $resNombre = $conn->query("SELECT CONCAT(nombre, ' ', apellido_paterno, ' ', apellido_materno) AS nombre_completo FROM usuarios WHERE id_usuario = $id_usuario");
-    if ($resNombre && $rowNombre = $resNombre->fetch_assoc()) {
-        $nombre_completo = $rowNombre['nombre_completo'];
-    }
-}
-
-$result = false;
+$total = 0;
 $productos_carrito = [];
+
 if ($id_usuario) {
     $query = "SELECT 
                 c.id_carrito,
@@ -129,211 +149,194 @@ if ($id_usuario) {
     </form>
 
 <!-- Formulario de Búsqueda -->
-<form id="productSearchForm" class="row g-2">
-    <input type="hidden" name="id_usuario" id="id_usuario_input" value="<?= $id_usuario ?>">
-    <div class="col-md-8 position-relative">
-        <div class="input-group">
-            <span class="input-group-text bg-custom-orange text-white">
-                <i class="fas fa-barcode"></i>
-            </span>
-            <input type="text" id="search_query" class="form-control" placeholder="Buscar producto por código o nombre..." autocomplete="off">
+    <form id="productSearchForm" class="row g-2">
+        <input type="hidden" name="id_usuario" id="id_usuario_input" value="<?= $id_usuario ?>">
+        <div class="col-md-8 position-relative">
+            <div class="input-group">
+                <span class="input-group-text bg-custom-orange text-white">
+                    <i class="fas fa-barcode"></i>
+                </span>
+                <input type="text" id="search_query" class="form-control" placeholder="Buscar producto por código o nombre..." autocomplete="off">
+            </div>
+            <div id="suggestions" class="list-group position-absolute w-100" style="z-index:1000;"></div>
         </div>
-        <div id="suggestions" class="list-group position-absolute w-100" style="z-index:1000;"></div>
-    </div>
-</form>
+    </form>
 
 <!-- Modal para añadir direcciones -->
-<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header bg-custom-orange text-white">
-        <h5 class="modal-title" id="addModalLabel">Agregar Nueva Dirección</h5>
-      </div>
-      <form action="sales/add_address.php" method="POST">
-        <div class="modal-body">
-            <input type="hidden" name="id_direccion">
-            <input type="hidden" name="id_usuario" value="<?= !empty($id_usuario) ? $id_usuario : '' ?>">
-
-          <div class="form-group mb-3">
-            <label for="">Número Interior</label>
-            <input type="number" name="num_int" class="form-control" required>
-          </div>
-
-          <div class="form-group mb-3">
-            <label for="">Número Exterior</label>
-            <input type="number" name="num_ext" class="form-control" required>
-          </div>
-
-          <div class="form-group mb-3">
-            <label for="">Calle</label>
-            <input type="text" name="calle" class="form-control" required>
-          </div>
-
-          <div class="form-group mb-3">
-            <label for="">Ciudad</label>
-            <input type="text" name="ciudad" class="form-control" required>
-          </div>
-
-          <div class="form-group mb-3">
-            <label for="">Estado</label>
-            <input type="text" name="estado" class="form-control" required>
-          </div>
-
-          <div class="form-group mb-3">
-            <label for="">Código Postal</label>
-            <input type="number" name="codigo_postal" class="form-control" required>
-          </div>
-
+    <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header bg-custom-orange text-white">
+            <h5 class="modal-title" id="addModalLabel">Agregar Nueva Dirección</h5>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-          <button type="submit" class="btn custom-orange-btn text-white">Agregar Dirección</button>
+        <form action="sales/add_address.php" method="POST">
+            <div class="modal-body">
+                <input type="hidden" name="id_direccion">
+                <input type="hidden" name="id_usuario" value="<?= !empty($id_usuario) ? $id_usuario : '' ?>">
+
+            <div class="form-group mb-3">
+                <label for="">Número Interior</label>
+                <input type="number" name="num_int" class="form-control" required>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="">Número Exterior</label>
+                <input type="number" name="num_ext" class="form-control" required>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="">Calle</label>
+                <input type="text" name="calle" class="form-control" required>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="">Ciudad</label>
+                <input type="text" name="ciudad" class="form-control" required>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="">Estado</label>
+                <input type="text" name="estado" class="form-control" required>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="">Código Postal</label>
+                <input type="number" name="codigo_postal" class="form-control" required>
+            </div>
+
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="submit" class="btn custom-orange-btn text-white">Agregar Dirección</button>
+            </div>
+        </form>
         </div>
-      </form>
     </div>
-  </div>
-</div>
+    </div>
 
 <!-- Modal de confirmación de venta -->
-<div class="modal fade" id="confirmSaleModal" tabindex="-1" aria-labelledby="confirmSaleLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow">
-      <div class="modal-header bg-custom-orange text-white">
-        <h5 class="modal-title" id="confirmSaleLabel">Confirmar Venta</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body text-center">
-        ¿Confirmas realizar la venta?
-      </div>
-      <div class="modal-footer justify-content-center">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn custom-orange-btn text-white" id="btnConfirmSale">Confirmar</button>
-      </div>
+    <div class="modal fade" id="confirmSaleModal" tabindex="-1" aria-labelledby="confirmSaleLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-custom-orange text-white">
+            <h5 class="modal-title" id="confirmSaleLabel">Confirmar Venta</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+            ¿Confirmas realizar la venta?
+        </div>
+        <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn custom-orange-btn text-white" id="btnConfirmSale">Confirmar</button>
+        </div>
+        </div>
     </div>
-  </div>
-</div>
+    </div>
 
 <!-- Modal para Eliminar -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow">
-      <div class="modal-header bg-custom-orange text-white">
-        <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body text-center">
-        ¿Estás seguro de que deseas eliminar este producto del carrito?
-      </div>
-      <div class="modal-footer justify-content-center">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <a href="#" id="btnConfirmDelete" class="btn custom-orange-btn text-white">Eliminar</a>
-      </div>
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+        <div class="modal-header bg-custom-orange text-white">
+            <h5 class="modal-title" id="confirmDeleteLabel">Confirmar eliminación</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+            ¿Estás seguro de que deseas eliminar este producto del carrito?
+        </div>
+        <div class="modal-footer justify-content-center">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <a href="#" id="btnConfirmDelete" class="btn custom-orange-btn text-white">Eliminar</a>
+        </div>
+        </div>
     </div>
-  </div>
-</div>
+    </div>
 
-<!-- Carrito de productos -->
-        <h2 class="fw-bold custom-orange-text text-center">
-            <?php if ($id_usuario): ?>
-                Productos para <?= htmlspecialchars($nombre_completo) ?>
-            <?php else: ?>
-                Productos
-            <?php endif; ?>
-        </h2>
-
-        <div class="table-responsive">
-            <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
-                <thead class="bg-primary text-white">
-                    <tr>
-                        <th>Código</th>
-                        <th>Imagen</th>
-                        <th>Producto</th>
-                        <th>Existencia</th>
-                        <th>Cantidad</th>
-                        <th>Precio</th>
-                        <th>Subtotal</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="products-container">
-                    <?php if ($id_usuario && count($productos_carrito) > 0): ?>
-                        <?php foreach ($productos_carrito as $row): ?>
-                            <?php
-                                $unidadBase = $row['unidad_medida'];
-                                $unidad_seleccionada = !empty($row['unidad_seleccionada']) ? $row['unidad_seleccionada'] : 'normal';
-                                $unidadesAlternativas = $row['unidades_alternativas'];
-                            ?>
-                            <tr>
-                                <td><?= htmlspecialchars($row['codigo']) ?></td>
-                                <td>
-                                    <img src='../../img/<?= htmlspecialchars($row['imagen']) ?>' class='rounded' width='100px' height='60px' alt='Imágen Producto'>
-                                </td>
-                                <td><?= htmlspecialchars($row['nombre_producto']) ?></td>
-                                <td><?= htmlspecialchars($row['stock']) ?></td>
-                                <td>
-                                    <form action="sales/update_quantity.php" method="POST" class="d-flex justify-content-center align-items-center">
-                                        <input type="hidden" name="id_carrito" value="<?= $row['id_carrito'] ?>">
-                                        <input type="hidden" name="id_usuario" value="<?= $id_usuario ?>">
-
-                                        <input type="number" name="cantidad" value="<?= $row['cantidad'] ?>" class="form-control text-center" style="width:70px;" min="0.01" step="0.01" required>
-
-                                        <select name="unidad_seleccionada" class="form-select ms-2" style="width:120px;">
-                                            <option value="normal" <?= ($unidad_seleccionada === 'normal') ? 'selected' : '' ?>>
-                                                <?= htmlspecialchars($unidadBase) ?>
-                                            </option>
-                                            <?php foreach ($unidadesAlternativas as $unidad => $factor): ?>
-                                                <option value="<?= htmlspecialchars($unidad) ?>" <?= ($unidad_seleccionada === $unidad) ? 'selected' : '' ?>>
-                                                    <?= htmlspecialchars($unidad) ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-
-                                        <button type="submit" class="btn btn-sm btn-outline-primary ms-2" title="Actualizar cantidad y unidad">
-                                            <i class="fas fa-sync-alt"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                                <td class="precio" data-precio-normal="<?= $row['precio_normal'] ?>" data-precio-pieza="<?= $row['precio_pieza'] ?>">
-                                    $<?= number_format($row['precio'], 2) ?>
-                                </td>
-                                <td class="subtotal">
-                                    $<?= number_format($row['subtotal'], 2) ?>
-                                </td>
-                                <td>
-                                    <button 
-                                        class='btn btn-sm btn-outline-danger me-2'
-                                        onclick='eliminarProducto(<?= $row['id_carrito'] ?>, <?= $id_usuario ?>); return false;'
-                                        data-bs-toggle='modal'
-                                        data-bs-target='#confirmDeleteModal'>
-                                        <i class='fas fa-trash'></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="9">No hay productos en el carrito.</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-
-            </table>
-        </div>
-
-        <div>
-            <p class="text-end" style="font-size: 20px;">Total: $<?= number_format($total, 2) ?></p>
-        </div>
-
+    <h2 class="fw-bold custom-orange-text text-center">
         <?php if ($id_usuario): ?>
-            <div class="text-end my-3">
-                <form id="saleForm" action="sales/sales_process.php" method="POST">
-                    <input type="hidden" name="id_usuario" value="<?= $id_usuario ?>">
-                    <button type="button" class="btn custom-orange-btn btn-sm text-white" id="btnOpenConfirm">
-                        <i class="fas fa-cash-register me-2"></i> Realizar Venta
-                    </button>
-                </form>
-            </div>
+            Productos para <?= htmlspecialchars($nombre_completo) ?>
+        <?php else: ?>
+            Productos
         <?php endif; ?>
+    </h2>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
+            <thead class="bg-primary text-white">
+                <tr>
+                    <th>Código</th>
+                    <th>Imagen</th>
+                    <th>Producto</th>
+                    <th>Existencia</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Subtotal</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="products-container">
+                <?php if ($id_usuario && count($productos_carrito) > 0): ?>
+                    <?php foreach ($productos_carrito as $row): ?>
+                        <?php
+                            $unidadBase = $row['unidad_medida'];
+                            $unidad_seleccionada = !empty($row['unidad_seleccionada']) ? $row['unidad_seleccionada'] : 'normal';
+                            $unidadesAlternativas = $row['unidades_alternativas'];
+                        ?>
+                        <tr>
+                            <td><?= htmlspecialchars($row['codigo']) ?></td>
+                            <td><img src='../../img/<?= htmlspecialchars($row['imagen']) ?>' class='rounded' width='100px' height='60px'></td>
+                            <td><?= htmlspecialchars($row['nombre_producto']) ?></td>
+                            <td><?= htmlspecialchars($row['stock']) ?></td>
+                            <td>
+                                <form action="sales/update_quantity.php" method="POST" class="d-flex justify-content-center align-items-center">
+                                    <input type="hidden" name="id_carrito" value="<?= $row['id_carrito'] ?>">
+                                    <input type="hidden" name="id_usuario" value="<?= $id_usuario ?>">
+                                    <input type="number" name="cantidad" value="<?= $row['cantidad'] ?>" class="form-control text-center" style="width:70px;" min="0.01" step="0.01" required>
+                                    <select name="unidad_seleccionada" class="form-select ms-2" style="width:120px;">
+                                        <option value="normal" <?= ($unidad_seleccionada === 'normal') ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($unidadBase) ?>
+                                        </option>
+                                        <?php foreach ($unidadesAlternativas as $unidad => $factor): ?>
+                                            <option value="<?= htmlspecialchars($unidad) ?>" <?= ($unidad_seleccionada === $unidad) ? 'selected' : '' ?>>
+                                                <?= htmlspecialchars($unidad) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-outline-primary ms-2"><i class="fas fa-sync-alt"></i></button>
+                                </form>
+                            </td>
+                            <td>$<?= number_format($row['precio'], 2) ?></td>
+                            <td>$<?= number_format($row['subtotal'], 2) ?></td>
+                            <td>
+                                <button class='btn btn-sm btn-outline-danger me-2'
+                                    onclick='eliminarProducto(<?= $row['id_carrito'] ?>, <?= $id_usuario ?>); return false;'
+                                    data-bs-toggle='modal' data-bs-target='#confirmDeleteModal'>
+                                    <i class='fas fa-trash'></i>
+                                </button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <tr><td colspan="8">No hay productos en el carrito.</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <p class="text-end" style="font-size: 20px;">Total: $<?= number_format($total, 2) ?></p>
+
+    <?php if ($id_usuario): ?>
+        <div class="text-end my-3">
+            <form id="saleForm" action="sales/sales_process.php" method="POST">
+                <input type="hidden" name="id_usuario" value="<?= $id_usuario ?>">
+                <input type="hidden" name="id_caja" value="<?= $id_caja ?>">
+                <button type="button" class="btn custom-orange-btn btn-sm text-white" id="btnOpenConfirm">
+                    <i class="fas fa-cash-register me-2"></i> Realizar Venta
+                </button>
+            </form>
+        </div>
+    <?php endif; ?>
+
 
 <script>
     function eliminarProducto(id_carrito, id_usuario) {

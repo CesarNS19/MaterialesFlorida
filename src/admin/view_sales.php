@@ -52,10 +52,13 @@ $totalPaginas = ceil($totalVentas / $ventasPorPagina);
 $sql = "SELECT v.id_venta, v.fecha, 
                SUM(d.cantidad) AS total_articulos, 
                SUM(d.subtotal) AS total_compra,
-               CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS nombre_completo
+               CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS cliente,
+               CONCAT(uc.nombre, ' ', uc.apellido_paterno, ' ', uc.apellido_materno) AS vendedor
         FROM ventas v
         JOIN detalle_venta d ON v.id_venta = d.id_venta
         JOIN usuarios u ON v.id_usuario = u.id_usuario
+        JOIN cajas c ON v.id_caja = c.id_caja
+        JOIN usuarios uc ON c.id_usuario = uc.id_usuario
         $searchQuery
         GROUP BY v.id_venta
         ORDER BY v.fecha DESC
@@ -68,13 +71,11 @@ $result = $conn->query($sql);
 <html lang="es" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
-    <title><?php echo $title; ?></title>
+    <title><?= $title ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
-    
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
 
@@ -139,25 +140,6 @@ $result = $conn->query($sql);
         </form>
 
         <?php
-        if (!empty($_GET['fecha_inicio']) || !empty($_GET['fecha_fin']) || !empty($_GET['mes']) || !empty($_GET['año'])) {
-            echo "<p class='text-center text-muted'>";
-            if (!empty($_GET['fecha_inicio'])) {
-                echo "Desde <strong>" . date('d/m/Y', strtotime($_GET['fecha_inicio'])) . "</strong> ";
-            }
-            if (!empty($_GET['fecha_fin'])) {
-                echo "hasta <strong>" . date('d/m/Y', strtotime($_GET['fecha_fin'])) . "</strong> ";
-            }
-            if (!empty($_GET['mes'])) {
-                echo "mes: <strong>" . $meses[$_GET['mes']] . "</strong> ";
-            }
-            if (!empty($_GET['año'])) {
-                echo "año: <strong>" . $_GET['año'] . "</strong>";
-            }
-            echo "</p>";
-        }
-        ?>
-
-        <?php
         $meses_en = [
             'January' => 'enero', 'February' => 'febrero', 'March' => 'marzo', 'April' => 'abril',
             'May' => 'mayo', 'June' => 'junio', 'July' => 'julio', 'August' => 'agosto',
@@ -168,22 +150,28 @@ $result = $conn->query($sql);
             echo "<div class='row row-cols-1 row-cols-md-2 g-4 mt-2'>";
             while ($venta = $result->fetch_assoc()) {
                 $fecha = new DateTime($venta['fecha']);
-                $fecha_formateada = 
-                    "<i class='fas fa-calendar-alt me-1'></i><strong>Fecha:</strong> " . 
+                $fecha_formateada = "<i class='fas fa-calendar-alt me-1'></i><strong>Fecha:</strong> " .
                     $fecha->format('d') . " de " . $meses_en[$fecha->format('F')] . " de " . $fecha->format('Y') .
                     "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" .
-                    "<i class='fas fa-clock ms-4 me-1'></i><strong>Hora:</strong> " . 
-                    $fecha->format('g:i A');
+                    "<i class='fas fa-clock ms-4 me-1'></i><strong>Hora:</strong> " . $fecha->format('g:i A');
 
                 echo "<div class='col'>";
                 echo "<div class='card border border-light shadow-sm rounded-4 h-100'>";
                 echo "<div class='card-header text-center fw-semibold rounded-top-4 bg-custom-orange text-white'><i class='fas fa-receipt me-2'></i> Venta Realizada</div>";
                 echo "<div class='card-body px-4 py-3 d-flex flex-column justify-content-between h-100'>";
+
                 echo "<div class='d-flex justify-content-between mb-3 text-muted small'><div>$fecha_formateada</div></div>";
-                echo "<div class='mb-3'><div class='fw-semibold text-body mb-1'><i class='fas fa-user me-2'></i>Cliente</div><div class='text-muted'>{$venta['nombre_completo']}</div></div>";
+
+                echo "<div class='d-flex justify-content-between mb-3 text-muted small'>";
+                echo "<div><i class='fas fa-user me-1'></i><strong>Cliente:</strong> {$venta['cliente']}</div>";
+                echo "<div><i class='fas fa-user-tie me-1'></i><strong>Vendedor:</strong> {$venta['vendedor']}</div>";
+                echo "</div>";
+
                 echo "<div class='row mb-3'><div class='col-6'><div class='fw-semibold text-body'><i class='fas fa-box me-2'></i>Artículos: {$venta['total_articulos']}</div></div>";
                 echo "<div class='col-6 text-end'><div class='fw-bold'>Total: \$" . number_format($venta['total_compra'], 2) . "</div></div></div>";
+
                 echo "<div class='mt-auto text-end'><button class='btn custom-orange-btn text-white btn-sm rounded-pill px-4' onclick='verTicket({$venta['id_venta']})' data-bs-toggle='tooltip' data-bs-placement='top' title='Ver ticket de venta'><i class='fas fa-eye me-1'></i></button></div>";
+
                 echo "</div></div></div>";
             }
             echo "</div>";
@@ -201,7 +189,6 @@ $result = $conn->query($sql);
                 echo '</ul>';
                 echo '</nav>';
             }
-
         } else {
             echo "<p class='text-center text-muted'>No se han encontrado ventas con los filtros aplicados.</p>";
         }
@@ -210,17 +197,17 @@ $result = $conn->query($sql);
 </div>
 
 <script>
-     function verTicket(idVenta) {
-        const pdfUrl = `../../pdf/venta_${idVenta}.pdf`;
-        window.open(pdfUrl, '_blank');
-    }
+function verTicket(idVenta) {
+    const pdfUrl = `../../pdf/venta_${idVenta}.pdf`;
+    window.open(pdfUrl, '_blank');
+}
 
-    document.addEventListener('DOMContentLoaded', function () {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-            new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+document.addEventListener('DOMContentLoaded', function () {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl);
     });
+});
 </script>
 
 </body>
