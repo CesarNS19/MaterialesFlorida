@@ -35,7 +35,7 @@ if ($caja) {
 
 <div id="Alert" class="container"></div>
 
-<div class="container py-4">
+<div class="container">
     <h2 class="mb-4"><i class="fas fa-cash-register custom-orange-text"></i> Gestión de Cajas</h2>
 
     <?php if ($caja): ?>

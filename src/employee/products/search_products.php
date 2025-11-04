@@ -13,7 +13,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 
 $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_medida,
                p.id_marca, m.nombre AS marca, p.nombre, 
-               p.precio, p.stock, p.ubicacion, p.fecha_ingreso, 
+               p.precio, p.precio_pieza, p.stock, p.ubicacion, p.fecha_ingreso, 
                p.estado, p.imagen, c.nombre AS categoria, c.id_categoria
         FROM productos p
         JOIN marcas m ON p.id_marca = m.id_marca
@@ -33,7 +33,7 @@ if ($result->num_rows > 0) {
                         echo "<td>" . htmlspecialchars($row['unidad_medida']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['stock']) . "</td>";
                         echo "<td class='text-success fw-bold'>$" . htmlspecialchars($row['precio']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['fecha_ingreso']) . "</td>";
+                        echo "<td class='text-success fw-bold'>$" . htmlspecialchars($row['precio_pieza']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['ubicacion']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['estado']) . "</td>";
                         echo "<td><img src='../../img/" . htmlspecialchars($row['imagen']) . "' class='rounded' width='100px' height='60px' alt='Imágen Producto'></td>";

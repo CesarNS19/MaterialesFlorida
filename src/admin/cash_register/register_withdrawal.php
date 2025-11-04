@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$caja) {
         $_SESSION['status_message'] = "La caja no existe.";
-        $_SESSION['status_type'] = "danger";
+        $_SESSION['status_type'] = "error";
         header("Location: ../cash_register.php");
         exit();
     }
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($monto > $disponible) {
         $_SESSION['status_message'] = "No puedes retirar $" . number_format($monto, 2) . ". Solo hay disponible $" . number_format($disponible, 2) . ".";
-        $_SESSION['status_type'] = "danger";
+        $_SESSION['status_type'] = "error";
         header("Location: ../cash_register.php");
         exit();
     }
@@ -77,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['status_type'] = "success";
     } else {
         $_SESSION['status_message'] = "Error al registrar el retiro: " . $stmt_insert->error;
-        $_SESSION['status_type'] = "danger";
+        $_SESSION['status_type'] = "error";
     }
 
     $stmt_insert->close();

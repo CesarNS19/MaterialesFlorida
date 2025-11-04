@@ -140,7 +140,7 @@ $_SESSION['last_activity'] = time();
 
         <h6>Gestión de Cajas</h6>
         <ul class="nav flex-column mb-3">
-            <li class="nav-item"><a href="cash_register.php" class="nav-link text-white"><i class="fas fa-money-bill-wave"></i> Corte de Caja</a></li>
+            <li class="nav-item"><a href="cash_register.php" class="nav-link text-white"><i class="fas fa-money-bill-wave"></i> Caja</a></li>
         </ul>
 
         <h6>Usuarios</h6>

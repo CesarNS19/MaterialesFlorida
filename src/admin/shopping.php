@@ -8,7 +8,7 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                p.id_marca, m.nombre AS marca, p.nombre, 
                dc.precio_unitario, 
                p.imagen, c.nombre AS categoria, c.id_categoria,
-               co.total, dc.cantidad, co.fecha, pro.nombre AS nombre_proveedor, dir.ciudad
+               co.total, dc.cantidad, co.fecha, co.hora, pro.nombre AS nombre_proveedor, dir.ciudad
         FROM detalle_compra dc
         JOIN compras co ON dc.id_compra = co.id_compra
         JOIN proveedores pro ON co.id_proveedor = pro.id_proveedor
@@ -25,8 +25,6 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <title><?php echo $title; ?></title>
-
-<div id="Alert" class="container"></div>
 
 <!-- Modal para añadir compras -->
 <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
@@ -89,9 +87,8 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
     </div>
 </div>
 
-<div class="container">
-    <div class="container-fluid d-flex">
     <main class="flex-fill p-4 overflow-auto" id="main-content">
+        <div id="Alert" class="container"></div>
         <h2 class="fw-bold custom-orange-text text-center">Mis Compras</h2>
         <button class="btn custom-orange-btn text-white" data-bs-toggle="modal" data-bs-target="#addModal" style="float: right; margin: 10px;">
             Nueva Compra
@@ -109,6 +106,7 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                     <th>Cantidad</th>
                     <th>Precio</th>
                     <th>Fecha Compra</th>
+                    <th>Hora Compra</th>
                     <th>Imagen</th>
                     <th>Total</th>
                 </tr>
@@ -129,6 +127,7 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                         echo "<td>" . htmlspecialchars($row['cantidad']) . "</td>";
                         echo "<td class='text-success fw-bold'>$" . htmlspecialchars($row['precio_unitario']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['fecha']) . "</td>";
+                        echo "<td>" . htmlspecialchars($row['hora']) . "</td>";
                         echo "<td><img src='../../img/" . htmlspecialchars($row['imagen']) . "' class='rounded' width='100px' height='60px' alt='Imágen Producto'></td>";
                         echo "<td>" . htmlspecialchars($row['total']) . "</td>";
                         echo "</tr>";
@@ -139,8 +138,7 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                 ?>
             </tbody>
         </table>
-    </main>    
-</div>
+    </main>
 
 <script>
    $(document).ready(function() {

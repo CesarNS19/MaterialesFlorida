@@ -10,11 +10,13 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
     $searchQuery = " WHERE p.nombre LIKE '%" . $conn->real_escape_string($searchTerm) . "%' ";
 }
 
- $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.email, u.estatus AS estado, p.nombre AS perfil, p.id_perfil, u.id_direccion, d.ciudad, u.telefono
-                FROM usuarios u
-                JOIN perfil p ON u.id_perfil = p.id_perfil
-                JOIN direcciones d ON u.id_direccion = d.id_direccion
-                WHERE p.nombre = 'Cliente'". $searchQuery;
+$sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u.email, u.telefono, u.estatus AS estado, 
+               p.nombre AS perfil, p.id_perfil, u.id_direccion, 
+               d.calle, d.num_ext, d.num_int, d.ciudad, d.estado AS estado_dir, d.codigo_postal
+        FROM usuarios u
+        JOIN perfil p ON u.id_perfil = p.id_perfil
+        JOIN direcciones d ON u.id_direccion = d.id_direccion
+        WHERE p.nombre = 'Cliente'" . $searchQuery;
 ?>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -48,12 +50,17 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                      <div class="form-group mb-3">
                         <label for="id_direccion">Direccion</label>
                         <select name="id_direccion" id="id_direccion" class="form-control" required>
-                            <option value="">Seleccione una direccción</option>
+                            <option value="">Seleccione una dirección</option>
                             <?php
                             $direcciones_sql = "SELECT * FROM direcciones";
                             $direcciones_result = $conn->query($direcciones_sql);
                             while ($direccion = $direcciones_result->fetch_assoc()) {
-                                echo "<option value='" . $direccion['id_direccion'] . "'>" . htmlspecialchars($direccion['ciudad']) . "</option>";
+                                $direccion_completa = htmlspecialchars(
+                                    $direccion['calle'] . ' ' . $direccion['num_ext'] .
+                                    ($direccion['num_int'] ? ' Int ' . $direccion['num_int'] : '') . ', ' .
+                                    $direccion['ciudad'] . ', ' . $direccion['estado'] . ' C.P. ' . $direccion['codigo_postal']
+                                );
+                                echo "<option value='" . $direccion['id_direccion'] . "'>$direccion_completa</option>";
                             }
                             ?>
                         </select>
@@ -114,7 +121,12 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                             $direcciones_sql = "SELECT * FROM direcciones";
                             $direcciones_result = $conn->query($direcciones_sql);
                             while ($direccion = $direcciones_result->fetch_assoc()) {
-                                echo "<option value='" . $direccion['id_direccion'] . "'>" . htmlspecialchars($direccion['ciudad']) . "</option>";
+                                $direccion_completa = htmlspecialchars(
+                                    $direccion['calle'] . ' ' . $direccion['num_ext'] .
+                                    ($direccion['num_int'] ? ' Int ' . $direccion['num_int'] : '') . ', ' .
+                                    $direccion['ciudad'] . ', ' . $direccion['estado'] . ' C.P. ' . $direccion['codigo_postal']
+                                );
+                                echo "<option value='" . $direccion['id_direccion'] . "'>$direccion_completa</option>";
                             }
                             ?>
                         </select>
@@ -139,7 +151,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 <div class="modal fade" id="deleteCustomerModal" tabindex="-1" aria-labelledby="deleteCustomerModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
+      <div class="modal-header bg-custom-orange text-white">
         <h5 class="modal-title" id="deleteCustomerModalLabel">Confirmar Eliminación</h5>
       </div>
       <form action="customers/delete_customer.php" method="POST">
@@ -149,7 +161,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-danger">Eliminar</button>
+          <button type="submit" class="btn custom-orange-btn text-white">Eliminar</button>
       </div>
       </form>
     </div>
@@ -181,9 +193,14 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
                         $nombre_completo = htmlspecialchars($row['nombre'] . ' ' . $row['apellido_paterno'] . ' ' . $row['apellido_materno']);
+                        $direccion_completa = htmlspecialchars(
+                            $row['calle'] . ' ' . $row['num_ext'] .
+                            ($row['num_int'] ? ' Int ' . $row['num_int'] : '') . ', ' .
+                            $row['ciudad'] . ', ' . $row['estado_dir'] . ' C.P. ' . $row['codigo_postal']
+                        );
                         echo "<tr>";
                         echo "<td>" . $nombre_completo . "</td>";
-                        echo "<td>" . htmlspecialchars($row['ciudad']) . "</td>";
+                        echo "<td>" . $direccion_completa . "</td>";
                         echo "<td>" . htmlspecialchars($row['email']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['telefono']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['estado']) . "</td>";

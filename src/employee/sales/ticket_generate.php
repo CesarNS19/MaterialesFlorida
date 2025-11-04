@@ -29,6 +29,23 @@ if (!$venta) {
     die('Venta no encontrada.');
 }
 
+$id_caja = intval($venta['id_caja']);
+
+$sqlCaja = "SELECT c.id_caja, c.id_usuario, CONCAT(u.nombre, ' ', u.apellido_paterno, ' ', u.apellido_materno) AS cajero
+            FROM cajas c
+            JOIN usuarios u ON c.id_usuario = u.id_usuario
+            JOIN ventas v ON v.id_caja = c.id_caja  
+            WHERE c.id_caja = $id_caja";
+$resultCaja = $conn->query($sqlCaja);
+
+if (!$resultCaja) {
+    die('Error en la consulta de caja: ' . $conn->error);
+}
+$caja = $resultCaja->fetch_assoc();
+if (!$caja) {
+    die('Caja no encontrada.');
+}
+
 $id_direccion = intval($venta['id_direccion']);
 
 $sql_dir = "SELECT 
@@ -93,13 +110,23 @@ $pdf->Line(10,$pdf->GetY(),200,$pdf->GetY());
 $pdf->Ln(4);
 
 $pdf->SetFont('Arial','',10);
-$pdf->Cell(100,6, toIso('Tejupilco México, a: ') . date('d/m/Y',strtotime($venta['fecha'])),0,0);
-$pdf->Cell(0,6, toIso('PEDIDO No: ') . str_pad($venta['id_venta'],4,'0',STR_PAD_LEFT),0,1);
+$pdf->Cell(100,6, toIso('Tejupilco México, a: ') . date('d/m/Y', strtotime($venta['fecha'])),0,0);
+$pdf->Cell(0,6, toIso('PEDIDO No: ') . str_pad($venta['id_venta'], 4, '0', STR_PAD_LEFT),0,1);
 
+$pdf->Cell(0,6, toIso('VENDEDOR: ') . toIso($caja['cajero']),0,1);
+
+$y = $pdf->GetY(); 
+$pdf->SetLineWidth(0.3);
+$pdf->Line(10, $y, 200, $y);
+
+$pdf->Ln(2);
 $pdf->Cell(0,6, toIso('CLIENTE: ') . toIso($venta['cliente']),0,1);
 $pdf->Cell(0,6, toIso('DIRECCIÓN: ') . toIso($direccionCompleta),0,1);
-$pdf->Cell(0,6,toIso('TELEFONO: ') . toIso($venta['telefono']),0,1);
+$pdf->Cell(0,6, toIso('TELÉFONO: ') . toIso($venta['telefono']),0,1);
+
 $pdf->Ln(4);
+
+
 
 $pdf->SetFont('Arial','B',10);
 $pdf->Cell(70,8,toIso('DESCRIPCIÓN'),1,0,'C');

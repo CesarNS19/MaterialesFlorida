@@ -13,10 +13,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conn->begin_transaction();
 
         try {
+            date_default_timezone_set('America/Mexico_City');
             $fecha = date("Y-m-d");
-            $sqlCompra = "INSERT INTO compras (id_proveedor, fecha, total) VALUES (?, ?, ?)";
+            $hora = date("H:i:s");
+            $sqlCompra = "INSERT INTO compras (id_proveedor, fecha, hora, total) VALUES (?, ?, ?, ?)";
             $stmtCompra = $conn->prepare($sqlCompra);
-            $stmtCompra->bind_param("isi", $id_proveedor, $fecha, $subtotal);
+            $stmtCompra->bind_param("issi", $id_proveedor, $fecha, $hora, $subtotal);
             $stmtCompra->execute();
             $id_compra = $stmtCompra->insert_id;
 
@@ -54,6 +56,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['status_type'] = "error";
 }
 
-header("Location: ../add_shopping.php");
+header("Location: ../shopping.php");
 exit;
 ?>

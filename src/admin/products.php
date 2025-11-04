@@ -32,8 +32,6 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <title><?php echo $title; ?></title>
 
-<div id="Alert" class="container"></div>
-
 <!-- Modal para añadir productos -->
 <div class="modal fade" id="addProductsModal" tabindex="-1" role="dialog" aria-labelledby="addProductsModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -231,7 +229,7 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
 <div class="modal fade" id="deleteProductsModal" tabindex="-1" aria-labelledby="deleteProductsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
+      <div class="modal-header bg-custom-orange text-white">
         <h5 class="modal-title" id="deleteProductsModalLabel">Confirmar Eliminación</h5>
       </div>
       <form action="products/delete_product.php" method="POST">
@@ -241,13 +239,13 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-danger">Eliminar</button>
+          <button type="submit" class="btn custom-orange-btn text-white">Eliminar</button>
       </div>
       </form>
     </div>
   </div>
 </div>
-
+  <div id="Alert" class="container"></div>
 <div class="container-fluid d-flex">
     <main class="flex-fill p-4 overflow-auto" id="main-content">
         <h2 class="fw-bold custom-orange-text text-center">Administrar Productos</h2>
@@ -267,7 +265,6 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
                     <th>Existencia</th>
                     <th>Precio</th>
                     <th>Precio Pz</th>
-                    <th>Fecha Ingreso</th>
                     <th>Ubicación</th>
                     <th>Estado</th>
                     <th>Imagen</th>
@@ -289,7 +286,6 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
                         echo "<td>" . htmlspecialchars($row['stock']) . "</td>";
                         echo "<td class='text-success fw-bold'>$" . htmlspecialchars($row['precio']) . "</td>";
                         echo "<td class='text-success fw-bold'>$" . htmlspecialchars($row['precio_pieza']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['fecha_ingreso']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['ubicacion']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['estado']) . "</td>";
                         echo "<td><img src='../../img/" . htmlspecialchars($row['imagen']) . "' class='rounded' width='100px' height='60px' alt='Imágen Producto'></td>";

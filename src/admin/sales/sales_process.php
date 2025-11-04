@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'], $_POST[
 
     if (!$caja) {
         $_SESSION['status_message'] = "No se encontró la caja especificada.";
-        $_SESSION['status_type'] = "danger";
+        $_SESSION['status_type'] = "warning";
         header("Location: ../sales.php?id_usuario=$id_usuario");
         exit;
     }
@@ -99,18 +99,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'], $_POST[
             header("Location: ../sales.php?id_usuario=$id_usuario&id_venta=$id_venta");
         } else {
             $_SESSION['status_message'] = "Error al guardar los detalles de la venta.";
-            $_SESSION['status_type'] = "danger";
+            $_SESSION['status_type'] = "error";
             header("Location: ../sales.php?id_usuario=$id_usuario");
         }
     } else {
         $_SESSION['status_message'] = "Error al registrar la venta: " . $stmtVenta->error;
-        $_SESSION['status_type'] = "danger";
+        $_SESSION['status_type'] = "error";
         header("Location: ../sales.php?id_usuario=$id_usuario");
     }
     exit;
 } else {
     $_SESSION['status_message'] = "Datos inválidos para procesar la venta.";
-    $_SESSION['status_type'] = "danger";
+    $_SESSION['status_type'] = "error";
     header("Location: ../sales.php");
     exit;
 }

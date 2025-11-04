@@ -13,7 +13,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
         d.ciudad LIKE '%$searchTerm%'";
 }
 
-$sql = "SELECT p.nombre, p.id_producto, p.telefono, p.email, p.fecha_ingreso, p.id_proveedor, p.estatus, d.id_direccion, d.ciudad, pro.nombre AS nombre_producto
+$sql = "SELECT p.nombre, p.id_producto, p.telefono, p.email, p.fecha_ingreso, p.id_proveedor, p.estatus, d.id_direccion, d.calle, d.num_ext, d.num_int, d.ciudad, d.estado AS estado_dir, d.codigo_postal, pro.nombre AS nombre_producto
         FROM proveedores p
         JOIN productos pro ON p.id_producto = pro.id_producto
         JOIN direcciones d ON p.id_direccion = d.id_direccion
@@ -64,12 +64,17 @@ $sql = "SELECT p.nombre, p.id_producto, p.telefono, p.email, p.fecha_ingreso, p.
                     <div class="form-group mb-3">
                         <label for="id_direccion">Direccion</label>
                         <select name="id_direccion" id="id_direccion" class="form-control" required>
-                            <option value="">Seleccione una direccción</option>
+                            <option value="">Seleccione una dirección</option>
                             <?php
                             $direcciones_sql = "SELECT * FROM direcciones";
                             $direcciones_result = $conn->query($direcciones_sql);
                             while ($direccion = $direcciones_result->fetch_assoc()) {
-                                echo "<option value='" . $direccion['id_direccion'] . "'>" . htmlspecialchars($direccion['ciudad']) . "</option>";
+                                $direccion_completa = htmlspecialchars(
+                                    $direccion['calle'] . ' ' . $direccion['num_ext'] .
+                                    ($direccion['num_int'] ? ' Int ' . $direccion['num_int'] : '') . ', ' .
+                                    $direccion['ciudad'] . ', ' . $direccion['estado'] . ' C.P. ' . $direccion['codigo_postal']
+                                );
+                                echo "<option value='" . $direccion['id_direccion'] . "'>$direccion_completa</option>";
                             }
                             ?>
                         </select>
@@ -130,7 +135,12 @@ $sql = "SELECT p.nombre, p.id_producto, p.telefono, p.email, p.fecha_ingreso, p.
                             $direcciones_sql = "SELECT * FROM direcciones";
                             $direcciones_result = $conn->query($direcciones_sql);
                             while ($direccion = $direcciones_result->fetch_assoc()) {
-                                echo "<option value='" . $direccion['id_direccion'] . "'>" . htmlspecialchars($direccion['ciudad']) . "</option>";
+                                $direccion_completa = htmlspecialchars(
+                                    $direccion['calle'] . ' ' . $direccion['num_ext'] .
+                                    ($direccion['num_int'] ? ' Int ' . $direccion['num_int'] : '') . ', ' .
+                                    $direccion['ciudad'] . ', ' . $direccion['estado'] . ' C.P. ' . $direccion['codigo_postal']
+                                );
+                                echo "<option value='" . $direccion['id_direccion'] . "'>$direccion_completa</option>";
                             }
                             ?>
                         </select>
@@ -150,7 +160,7 @@ $sql = "SELECT p.nombre, p.id_producto, p.telefono, p.email, p.fecha_ingreso, p.
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
+      <div class="modal-header bg-custom-orange text-white">
         <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
       </div>
       <form action="suppliers/delete_supplier.php" method="POST">
@@ -160,7 +170,7 @@ $sql = "SELECT p.nombre, p.id_producto, p.telefono, p.email, p.fecha_ingreso, p.
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-danger">Eliminar</button>
+          <button type="submit" class="btn custom-orange-btn text-white">Eliminar</button>
       </div>
       </form>
     </div>
@@ -182,7 +192,6 @@ $sql = "SELECT p.nombre, p.id_producto, p.telefono, p.email, p.fecha_ingreso, p.
                     <th>Teléfono</th>
                     <th>Email</th>
                     <th>Dirección</th>
-                    <th>Fecha Ingreso</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -193,13 +202,17 @@ $sql = "SELECT p.nombre, p.id_producto, p.telefono, p.email, p.fecha_ingreso, p.
                 if ($result->num_rows > 0) {
                     while ($row = $result->fetch_assoc()) {
                         $nombre_completo = htmlspecialchars($row['nombre']);
+                        $direccion_completa = htmlspecialchars(
+                            $row['calle'] . ' ' . $row['num_ext'] .
+                            ($row['num_int'] ? ' Int ' . $row['num_int'] : '') . ', ' .
+                            $row['ciudad'] . ', ' . $row['estado_dir'] . ' C.P. ' . $row['codigo_postal']
+                        );
                         echo "<tr>";
                         echo "<td>" . $nombre_completo . "</td>";
                         echo "<td>" . htmlspecialchars($row['nombre_producto']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['telefono']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['ciudad']) . "</td>";
-                        echo "<td>" . htmlspecialchars($row['fecha_ingreso']) . "</td>";
+                        echo "<td>" . $direccion_completa . "</td>";
                         echo "<td>";
                     
                         if ($row['estatus'] === 'activo') {
@@ -251,7 +264,7 @@ $sql = "SELECT p.nombre, p.id_producto, p.telefono, p.email, p.fecha_ingreso, p.
         $('#edit_id_proveedor').val(data.id_proveedor);
         $('#edit_id_direccion').val(data.id_direccion);
         $('#edit_nombre').val(data.nombre);
-        $('#edit_producto').val(data.producto);
+        $('#edit_producto').val(data.id_producto);
         $('#edit_telefono').val(data.telefono);
         $('#edit_email').val(data.email);
         $('#editModal').modal('show');

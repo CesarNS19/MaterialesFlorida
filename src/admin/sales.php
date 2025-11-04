@@ -118,7 +118,7 @@ if ($id_usuario) {
     <form id="selectUserForm" method="GET" action="">
         <div class="row g-2 align-items-center">
             <div class="col-sm-4">
-                <label for="id_usuario" class="form-label">Seleccionar Usuario:</label>
+                <label for="id_usuario" class="form-label">Seleccionar Cliente:</label>
                 <select class="form-select" id="id_usuario" name="id_usuario" onchange="document.getElementById('selectUserForm').submit();">
                     <option value="">-- Selecciona un usuario --</option>
                     <?php while ($usuario = $usuarios_result->fetch_assoc()): ?>

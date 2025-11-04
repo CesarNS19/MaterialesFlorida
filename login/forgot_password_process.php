@@ -67,7 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } catch (Exception $e) {
             $_SESSION['status_message'] = "Error al enviar el correo: {$mail->ErrorInfo}";
             $_SESSION['status_type'] = "error";
-            header("Location: login.php");
+            header("Location: login.php?form=forgot_password");
             exit();
         }
     } else {
