@@ -7,7 +7,7 @@ $title = "La Florida ┃ Compras";
 $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                p.id_marca, m.nombre AS marca, p.nombre, 
                dc.precio_unitario, 
-               p.imagen, c.nombre AS categoria, c.id_categoria,
+               p.imagen, p.precio AS precio_venta, c.nombre AS categoria, c.id_categoria,
                co.total, dc.cantidad, co.fecha, co.hora, pro.nombre AS nombre_proveedor, dir.ciudad
         FROM detalle_compra dc
         JOIN compras co ON dc.id_compra = co.id_compra
@@ -104,7 +104,8 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                     <th>Marca</th>
                     <th>U. Medida</th>
                     <th>Cantidad</th>
-                    <th>Precio</th>
+                    <th>Precio Compra</th>
+                    <th>Precio Venta</th>
                     <th>Fecha Compra</th>
                     <th>Hora Compra</th>
                     <th>Imagen</th>
@@ -126,6 +127,7 @@ $sql = "SELECT p.id_producto, p.id_unidad_medida, u.nombre AS unidad_medida,
                         echo "<td>" . htmlspecialchars($row['unidad_medida']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['cantidad']) . "</td>";
                         echo "<td class='text-success fw-bold'>$" . htmlspecialchars($row['precio_unitario']) . "</td>";
+                        echo "<td class='text-primary fw-bold'>$" . htmlspecialchars($row['precio_venta']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['fecha']) . "</td>";
                         echo "<td>" . htmlspecialchars($row['hora']) . "</td>";
                         echo "<td><img src='../../img/" . htmlspecialchars($row['imagen']) . "' class='rounded' width='100px' height='60px' alt='Imágen Producto'></td>";
