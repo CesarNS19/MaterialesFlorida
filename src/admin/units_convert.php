@@ -134,8 +134,8 @@ $sql = "SELECT u.id_conversion, u.id_producto,  u.unidad_medida, u.factor, p.nom
     <button class="btn custom-orange-btn text-white" data-bs-toggle="modal" data-bs-target="#addModal" style="float: right; margin: 10px;">
             Agregar Unidad de Conversión
         </button>
-    <div class="table-responsive">
-        <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3" id="brandsTable">
+    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+    <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
             <thead class="bg-primary text-white">
                 <tr>
                     <th>Producto</th>

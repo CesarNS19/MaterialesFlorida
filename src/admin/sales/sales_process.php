@@ -3,6 +3,7 @@ session_start();
 require '../../../mysql/connection.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'], $_POST['id_caja'])) {
+
     $id_usuario = intval($_POST['id_usuario']);
     $id_caja = intval($_POST['id_caja']);
 
@@ -28,9 +29,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'], $_POST[
         exit;
     }
 
-    $carrito_sql = "SELECT c.id_producto, c.cantidad, c.unidad_seleccionada, c.precio, c.subtotal
-                    FROM carrito c
-                    WHERE c.id_usuario = ?";
+    $carrito_sql = "SELECT id_producto, cantidad, unidad_seleccionada, precio, subtotal
+                    FROM carrito
+                    WHERE id_usuario = ?";
     $stmtCarrito = $conn->prepare($carrito_sql);
     $stmtCarrito->bind_param('i', $id_usuario);
     $stmtCarrito->execute();
@@ -56,27 +57,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'], $_POST[
     date_default_timezone_set('America/Mexico_City');
     $fecha = date('Y-m-d H:i:s');
 
-    $insertVenta = "INSERT INTO ventas (id_usuario, id_caja, fecha, total) VALUES (?, ?, ?, ?)";
+    $insertVenta = "INSERT INTO ventas (id_usuario, id_caja, fecha, total)
+                    VALUES (?, ?, ?, ?)";
     $stmtVenta = $conn->prepare($insertVenta);
     $stmtVenta->bind_param('iisd', $id_usuario, $id_caja, $fecha, $total);
 
     if ($stmtVenta->execute()) {
+
         $id_venta = $stmtVenta->insert_id;
         $stmtVenta->close();
-
         $ok = true;
 
         foreach ($productos as $p) {
+
             $id_producto = $p['id_producto'];
-            $cantidad = $p['cantidad'];
-            $unidad_seleccionada = $conn->real_escape_string($p['unidad_seleccionada']);
+            $cantidad = floatval($p['cantidad']);
+            $unidad_seleccionada = $p['unidad_seleccionada'];
             $precio_unitario = $p['precio'];
             $subtotal = $p['subtotal'];
 
-            $insertDetalle = "INSERT INTO detalle_venta (id_producto, id_venta, cantidad, unidad_seleccionada, precio_unitario, subtotal)
+            $insertDetalle = "INSERT INTO detalle_venta
+                                (id_producto, id_venta, cantidad, unidad_seleccionada, precio_unitario, subtotal)
                               VALUES (?, ?, ?, ?, ?, ?)";
             $stmtDetalle = $conn->prepare($insertDetalle);
-            $stmtDetalle->bind_param('iiisdd', $id_producto, $id_venta, $cantidad, $unidad_seleccionada, $precio_unitario, $subtotal);
+            $stmtDetalle->bind_param(
+                'iidsdd',
+                $id_producto,
+                $id_venta,
+                $cantidad,         
+                $unidad_seleccionada,
+                $precio_unitario,
+                $subtotal
+            );
 
             if (!$stmtDetalle->execute()) {
                 $ok = false;
@@ -96,24 +108,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'], $_POST[
 
             $_SESSION['status_message'] = "Venta realizada exitosamente. Total: $" . number_format($total, 2);
             $_SESSION['status_type'] = "success";
+
             header("Location: ../sales.php?id_usuario=$id_usuario&id_venta=$id_venta");
         } else {
             $_SESSION['status_message'] = "Error al guardar los detalles de la venta.";
             $_SESSION['status_type'] = "error";
             header("Location: ../sales.php?id_usuario=$id_usuario");
         }
+
     } else {
         $_SESSION['status_message'] = "Error al registrar la venta: " . $stmtVenta->error;
         $_SESSION['status_type'] = "error";
         header("Location: ../sales.php?id_usuario=$id_usuario");
     }
-    exit;
-} else {
-    $_SESSION['status_message'] = "Datos inválidos para procesar la venta.";
-    $_SESSION['status_type'] = "error";
-    header("Location: ../sales.php");
+
     exit;
 }
+
+$_SESSION['status_message'] = "Datos inválidos para procesar la venta.";
+$_SESSION['status_type'] = "error";
+header("Location: ../sales.php");
+exit;
 
 $conn->close();
 ?>

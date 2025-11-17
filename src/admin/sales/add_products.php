@@ -91,21 +91,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && (isset($_POST["product_code"]) || i
         $subtotal = $precio;
 
         $insert = $conn->prepare("
-            INSERT INTO carrito (id_producto, id_usuario, cantidad, precio, subtotal, unidad_seleccionada) 
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO carrito (id_producto, id_usuario, cantidad, unidad_seleccionada) 
+            VALUES (?, ?, ?, ?)
         ");
-        $insert->bind_param("iiidds", $id_producto, $id_usuario, $cantidad, $precio, $subtotal, $unidad_seleccionada);
+        $insert->bind_param("iiis", $id_producto, $id_usuario, $cantidad, $unidad_seleccionada);
         $insert->execute();
 
         $_SESSION['status_message'] = "Producto agregado al carrito.";
         $_SESSION['status_type'] = "success";
     }
-
-    $new_stock = $stock - 1;
-    $update_stock = $conn->prepare("UPDATE productos SET stock = ? WHERE id_producto = ?");
-    $update_stock->bind_param("ii", $new_stock, $id_producto);
-    $update_stock->execute();
-
     header("Location: ../sales.php?id_usuario=" . $id_usuario);
     exit;
 }

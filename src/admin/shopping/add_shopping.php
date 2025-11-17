@@ -1,61 +1,90 @@
 <?php
-session_start();
 require '../../../mysql/connection.php';
+header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id_proveedor = isset($_POST['id_provedor']) ? intval($_POST['id_provedor']) : null;
-    $id_producto = isset($_POST['id_producto']) ? intval($_POST['id_producto']) : null;
-    $cantidad = isset($_POST['cantidad']) ? floatval($_POST['cantidad']) : 0;
-    $precio = isset($_POST['precio']) ? floatval($_POST['precio']) : 0;
-    $subtotal = isset($_POST['subtotal']) ? floatval($_POST['subtotal']) : 0;
-
-    if ($id_proveedor && $id_producto && $cantidad > 0 && $precio > 0 && $subtotal > 0) {
-        $conn->begin_transaction();
-
-        try {
-            date_default_timezone_set('America/Mexico_City');
-            $fecha = date("Y-m-d");
-            $hora = date("H:i:s");
-            $sqlCompra = "INSERT INTO compras (id_proveedor, fecha, hora, total) VALUES (?, ?, ?, ?)";
-            $stmtCompra = $conn->prepare($sqlCompra);
-            $stmtCompra->bind_param("issi", $id_proveedor, $fecha, $hora, $subtotal);
-            $stmtCompra->execute();
-            $id_compra = $stmtCompra->insert_id;
-
-            $sqlDetalle = "INSERT INTO detalle_compra (id_producto, id_compra, precio_unitario, cantidad, subtotal) VALUES (?, ?, ?, ?, ?)";
-            $stmtDetalle = $conn->prepare($sqlDetalle);
-            $stmtDetalle->bind_param("iiddi", $id_producto, $id_compra, $precio, $cantidad, $subtotal);
-            $stmtDetalle->execute();
-
-            $sqlStock = "UPDATE productos SET stock = stock + ? WHERE id_producto = ?";
-            $stmtStock = $conn->prepare($sqlStock);
-            $stmtStock->bind_param("di", $cantidad, $id_producto);
-            $stmtStock->execute();
-
-            $sqlPrecioCompra = "UPDATE productos SET precio_compra = ? WHERE id_producto = ?";
-            $stmtPrecioCompra = $conn->prepare($sqlPrecioCompra);
-            $stmtPrecioCompra->bind_param("di", $precio, $id_producto);
-            $stmtPrecioCompra->execute();
-
-            $conn->commit();
-
-            $_SESSION['status_message'] = "Compra registrada correctamente.";
-            $_SESSION['status_type'] = "success";
-        } catch (Exception $e) {
-            $conn->rollback();
-            $_SESSION['status_message'] = "Error al registrar la compra: " . $e->getMessage();
-            $_SESSION['status_type'] = "error";
-        }
-
-    } else {
-        $_SESSION['status_message'] = "Por favor, complete todos los campos correctamente.";
-        $_SESSION['status_type'] = "warning";
-    }
-} else {
-    $_SESSION['status_message'] = "Solicitud inválida.";
-    $_SESSION['status_type'] = "error";
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(["status" => "error", "message" => "Solicitud inválida."]);
+    exit;
 }
 
-header("Location: ../shopping.php");
-exit;
+$id_proveedor = intval($_POST['id_provedor'] ?? 0);
+$id_producto = intval($_POST['id_producto'] ?? 0);
+$id_conversion = intval($_POST['id_conversion'] ?? 0);
+$unidad_medida = $_POST['unidad_nombre'] ?? '';
+$cantidad = floatval($_POST['cantidad'] ?? 0);
+$precio = floatval($_POST['precio'] ?? 0);
+$subtotal = floatval($_POST['subtotal'] ?? 0);
+
+if (!$id_proveedor || !$id_producto || !$id_conversion || empty($unidad_medida)) {
+    echo json_encode(["status" => "warning", "message" => "Complete todos los campos."]);
+    exit;
+}
+
+$conn->begin_transaction();
+
+try {
+
+    $sqlFactor = "SELECT factor FROM unidades_conversion WHERE id_conversion = ? LIMIT 1";
+    $stmtFactor = $conn->prepare($sqlFactor);
+    $stmtFactor->bind_param("i", $id_conversion);
+    $stmtFactor->execute();
+    $resultFactor = $stmtFactor->get_result();
+
+    $factor = 1;
+    if ($resultFactor->num_rows > 0) {
+        $rowFactor = $resultFactor->fetch_assoc();
+        $factor = floatval($rowFactor['factor']);
+    }
+
+    $cantidad_convertida = $cantidad * $factor;
+
+    date_default_timezone_set('America/Mexico_City');
+    $fecha = date("Y-m-d");
+    $hora = date("H:i:s");
+
+    $sqlCompra = "INSERT INTO compras (id_proveedor, fecha, hora, total)
+                  VALUES (?, ?, ?, ?)";
+    $stmtCompra = $conn->prepare($sqlCompra);
+    $stmtCompra->bind_param("issi", $id_proveedor, $fecha, $hora, $subtotal);
+    $stmtCompra->execute();
+    $id_compra = $stmtCompra->insert_id;
+
+    $sqlDetalle = "INSERT INTO detalle_compra 
+        (id_producto, id_compra, unidad_medida, precio_unitario, cantidad, subtotal)
+        VALUES (?, ?, ?, ?, ?, ?)";
+
+    $stmtDetalle = $conn->prepare($sqlDetalle);
+    $stmtDetalle->bind_param("iisdid", 
+        $id_producto, 
+        $id_compra, 
+        $unidad_medida, 
+        $precio, 
+        $cantidad, 
+        $subtotal
+    );
+    $stmtDetalle->execute();
+
+    $sqlStock = "UPDATE productos SET stock = stock + ? WHERE id_producto = ?";
+    $stmtStock = $conn->prepare($sqlStock);
+    $stmtStock->bind_param("di", $cantidad_convertida, $id_producto);
+    $stmtStock->execute();
+
+    $conn->commit();
+
+    echo json_encode([
+        "status" => "success",
+        "message" => "Compra registrada correctamente."
+    ]);
+    exit;
+
+} catch (Exception $e) {
+
+    $conn->rollback();
+
+    echo json_encode([
+        "status" => "error",
+        "message" => "Error al registrar la compra: " . $e->getMessage()
+    ]);
+    exit;
+}
 ?>

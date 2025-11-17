@@ -219,13 +219,13 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
   </div>
 </div>
   <div id="Alert" class="container"></div>
-<div class="container-fluid d-flex">
-    <main class="flex-fill p-4 overflow-auto" id="main-content">
-        <h2 class="fw-bold custom-orange-text text-center">Administrar Productos</h2>
-        <button class="btn custom-orange-btn text-white" data-bs-toggle="modal" data-bs-target="#addProductsModal" style="float: right; margin: 10px;">
-            Agregar Producto
-        </button>
-        <a href="units_of_measure.php" class="btn custom-orange-btn text-white">Ver Unidades Medida</a>
+    <div class="container-fluid d-flex vh-100">
+        <main class="flex-fill p-4 overflow-auto vh-100" id="main-content">
+            <h2 class="fw-bold custom-orange-text text-center">Administrar Productos</h2>
+            <button class="btn custom-orange-btn text-white" data-bs-toggle="modal" data-bs-target="#addProductsModal" style="float: right; margin: 10px;">
+                Agregar Producto
+            </button>
+            <a href="units_of_measure.php" class="btn custom-orange-btn text-white">Ver Unidades Medida</a>
     <div class="table-responsive">
         <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
             <thead class="bg-primary text-white">

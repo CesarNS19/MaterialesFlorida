@@ -112,13 +112,13 @@ $_SESSION['last_activity'] = time();
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" href="../../login/logout.php"><i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión</a></li>
+                        <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i> Perfil</a></li>
                     </ul>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
-
 
 <div class="offcanvas offcanvas-start custom-orange-bg text-white" tabindex="-1" id="sidebarMenu">
     <div class="offcanvas-header">

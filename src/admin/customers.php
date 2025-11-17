@@ -174,8 +174,8 @@ $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u
     <button class="btn custom-orange-btn text-white" data-bs-toggle="modal" data-bs-target="#addCustomersModal" style="float: right; margin: 10px;">
             Agregar Cliente
         </button>
-    <div class="table-responsive">
-        <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
+    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+    <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
             <thead class="bg-primary text-white">
                 <tr>
                     <th>Cliente</th>

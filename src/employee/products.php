@@ -151,33 +151,6 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
                             ?>
                         </select>
                     </div>
-
-                    <div class="form-group mb-3">
-                        <label for="edit_marca">Marca</label>
-                        <select name="id_marca" id="edit_marca" class="form-control" required>
-                            <?php
-                            $marcas_sql = "SELECT * FROM marcas";
-                            $marcas_result = $conn->query($marcas_sql);
-                            while ($marca = $marcas_result->fetch_assoc()) {
-                                echo "<option value='" . $marca['id_marca'] . "'>" . htmlspecialchars($marca['nombre']) . "</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label for="edit_id_categoria">Categoría</label>
-                        <select name="id_categoria" id="edit_id_categoria" class="form-control" required>
-                            <?php
-                            $categoria_sql = "SELECT * FROM categorias";
-                            $categoria_result = $conn->query($categoria_sql);
-                            while ($categoria = $categoria_result->fetch_assoc()) {
-                                echo "<option value='" . $categoria['id_categoria'] . "'>" . htmlspecialchars($categoria['nombre']) . "</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-
                      <div class="form-group mb-3">
                         <label for="edit_codigo">Código del producto</label>
                         <input type="text" name="codigo" id="edit_codigo" class="form-control" required>
@@ -246,13 +219,13 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
   </div>
 </div>
   <div id="Alert" class="container"></div>
-<div class="container-fluid d-flex">
-    <main class="flex-fill p-4 overflow-auto" id="main-content">
-        <h2 class="fw-bold custom-orange-text text-center">Administrar Productos</h2>
-        <button class="btn custom-orange-btn text-white" data-bs-toggle="modal" data-bs-target="#addProductsModal" style="float: right; margin: 10px;">
-            Agregar Producto
-        </button>
-        <a href="units_of_measure.php" class="btn custom-orange-btn text-white">Ver Unidades Medida</a>
+    <div class="container-fluid d-flex vh-100">
+        <main class="flex-fill p-4 overflow-auto vh-100" id="main-content">
+            <h2 class="fw-bold custom-orange-text text-center">Administrar Productos</h2>
+            <button class="btn custom-orange-btn text-white" data-bs-toggle="modal" data-bs-target="#addProductsModal" style="float: right; margin: 10px;">
+                Agregar Producto
+            </button>
+            <a href="units_of_measure.php" class="btn custom-orange-btn text-white">Ver Unidades Medida</a>
     <div class="table-responsive">
         <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
             <thead class="bg-primary text-white">
@@ -337,10 +310,8 @@ $sql = "SELECT p.id_producto, p.codigo, p.id_unidad_medida, u.nombre AS unidad_m
 
     function openEditModal(productsData) {
         $('#edit_id_producto').val(productsData.id_producto);
-        $('#edit_id_categoria').val(productsData.id_categoria);
         $('#edit_codigo').val(productsData.codigo);
         $('#edit_unidad').val(productsData.id_unidad_medida);
-        $('#edit_marca').val(productsData.id_marca);
         $('#edit_nombre').val(productsData.nombre); 
         $('#edit_precio').val(productsData.precio);
          $('#edit_precio_pz').val(productsData.precio_pieza);

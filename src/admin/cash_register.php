@@ -26,12 +26,11 @@ if ($caja) {
 }
 ?>
 
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<title><?php echo $title; ?></title>
+<title><?= $title ?></title>
 
 <div id="Alert" class="container"></div>
 
@@ -46,22 +45,16 @@ if ($caja) {
                     <p><strong>Fecha apertura:</strong> <?= $caja['fecha_apertura'] ?></p>
                     <p><strong>Saldo inicial:</strong> $<?= number_format($caja['saldo_inicial'], 2) ?></p>
                     <p><strong>Saldo actual:</strong> $<span id="saldoActual"><?= number_format($saldoActual, 2) ?></span></p>
-                    <form method="POST" action="cash_register/process_cut.php" class="mt-3">
+                    <form id="cutForm" method="POST" action="cash_register/process_cut.php" class="mt-3">
                         <input type="hidden" name="id_caja" value="<?= $caja['id_caja'] ?>">
+                        <input type="hidden" name="saldo_real" id="inputSaldoReal">
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label">Saldo real contado:</label>
-                                <input type="number" step="0.01" name="saldo_real" class="form-control" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Tipo de corte:</label>
-                                <select name="tipo_corte" class="form-select">
-                                    <option value="diario">Diario</option>
-                                    <option value="semanal">Semanal</option>
-                                </select>
+                                <input type="number" step="0.01" id="saldo_real" class="form-control" required>
                             </div>
                             <div class="col-md-4 d-flex align-items-end">
-                                <button type="submit" class="btn custom-orange-btn text-white w-100">
+                                <button type="button" class="btn custom-orange-btn text-white w-100" data-bs-toggle="modal" data-bs-target="#passwordCajaModal">
                                     <i class="fas fa-lock"></i> Realizar Corte
                                 </button>
                             </div>
@@ -70,7 +63,47 @@ if ($caja) {
                 </div>
             </div>
 
-            <!-- Registrar retiro -->
+            <!-- Modal password_caja -->
+            <div class="modal fade" id="passwordCajaModal" tabindex="-1" aria-labelledby="passwordCajaModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <form id="formPasswordCaja" method="POST" action="cash_register/process_cut.php">
+                            <div class="modal-header bg-custom-orange text-white">
+                                <h5 class="modal-title" id="passwordCajaModalLabel"><i class="fas fa-key"></i> Contraseña de Administrador</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Ingrese la contraseña de caja de cualquier administrador para realizar el corte:</p>
+                                <div class="mb-3">
+                                    <input type="password" class="form-control" id="password_caja" name="password_caja" placeholder="Contraseña" required>
+                                </div>
+                                <input type="hidden" name="id_caja" value="<?= $caja['id_caja'] ?>">
+                                <input type="hidden" name="saldo_real" id="modalSaldoReal">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn custom-orange-btn text-white">Confirmar Corte</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                const saldoInput = document.getElementById('saldo_real');
+                const modalSaldoInput = document.getElementById('modalSaldoReal');
+                const inputSaldoReal = document.getElementById('inputSaldoReal');
+
+                saldoInput.addEventListener('input', function() {
+                    modalSaldoInput.value = saldoInput.value;
+                });
+
+                document.getElementById('formPasswordCaja').addEventListener('submit', function() {
+                    inputSaldoReal.value = modalSaldoInput.value;
+                });
+            </script>
+            
+        <!-- Registrar retiro -->
             <div class="card mb-4 shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title custom-orange-text"><i class="fas fa-minus-circle"></i> Registrar Retiro</h5>
@@ -167,7 +200,6 @@ if ($caja) {
                         <th>Saldo Sistema</th>
                         <th>Saldo Real</th>
                         <th>Diferencia</th>
-                        <th>Tipo</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -183,7 +215,6 @@ if ($caja) {
                                     <td>$".number_format($row['saldo_sistema'],2)."</td>
                                     <td>$".number_format($row['saldo_real'],2)."</td>
                                     <td class='$color'>$".number_format($row['diferencia'],2)."</td>
-                                    <td>{$row['tipo_corte']}</td>
                                   </tr>";
                         }
                     } else {

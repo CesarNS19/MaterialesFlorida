@@ -108,13 +108,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $updateCarrito = "UPDATE carrito SET cantidad = $cantidad, unidad_seleccionada = '$unidad_seleccionada', precio = $precio, subtotal = $subtotal WHERE id_carrito = $id_carrito";
 
-    $updateStock = "UPDATE productos SET stock = $stockNuevo WHERE id_producto = $id_producto";
-
-    if ($conn->query($updateCarrito) && $conn->query($updateStock)) {
-        $_SESSION['status_message'] = "Cantidad y stock actualizados correctamente.";
+    if ($conn->query($updateCarrito)) {
+        $_SESSION['status_message'] = "Cantidad actualizada correctamente.";
         $_SESSION['status_type'] = "success";
     } else {
-        $_SESSION['status_message'] = "Error al actualizar cantidad o stock.";
+        $_SESSION['status_message'] = "Error al actualizar cantidad.";
         $_SESSION['status_type'] = "error";
     }
 

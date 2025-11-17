@@ -260,8 +260,8 @@ if ($id_usuario) {
         <?php endif; ?>
     </h2>
 
-    <div class="table-responsive">
-        <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
+    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
+    <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
             <thead class="bg-primary text-white">
                 <tr>
                     <th>Código</th>
@@ -293,9 +293,6 @@ if ($id_usuario) {
                                     <input type="hidden" name="id_usuario" value="<?= $id_usuario ?>">
                                     <input type="number" name="cantidad" value="<?= $row['cantidad'] ?>" class="form-control text-center" style="width:70px;" min="0.01" step="0.01" required>
                                     <select name="unidad_seleccionada" class="form-select ms-2" style="width:120px;">
-                                        <option value="normal" <?= ($unidad_seleccionada === 'normal') ? 'selected' : '' ?>>
-                                            <?= htmlspecialchars($unidadBase) ?>
-                                        </option>
                                         <?php foreach ($unidadesAlternativas as $unidad => $factor): ?>
                                             <option value="<?= htmlspecialchars($unidad) ?>" <?= ($unidad_seleccionada === $unidad) ? 'selected' : '' ?>>
                                                 <?= htmlspecialchars($unidad) ?>

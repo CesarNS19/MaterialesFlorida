@@ -183,7 +183,7 @@ $sql = "SELECT p.nombre, p.id_producto, p.telefono, p.email, p.fecha_ingreso, p.
     <button class="btn custom-orange-btn text-white" data-bs-toggle="modal" data-bs-target="#addModal" style="float: right; margin: 10px;">
             Agregar Proveedor
         </button>
-    <div class="table-responsive">
+    <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
         <table class="table table-hover table-bordered text-center align-middle shadow-sm rounded-3">
             <thead class="bg-primary text-white">
                 <tr>

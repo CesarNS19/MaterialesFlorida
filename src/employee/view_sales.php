@@ -80,7 +80,7 @@ $result = $conn->query($sql);
 <body>
 
 <div class="container-fluid d-flex" id="products-container">
-    <main class="flex-fill p-4 overflow-auto" id="main-content">
+        <main class="flex-fill p-4 overflow-auto vh-100" id="main-content">
         <h2 class="text-center custom-orange-text fw-bold mt-2">Ventas</h2>
 
         <form class="row g-3 align-items-center mb-4" method="GET">
