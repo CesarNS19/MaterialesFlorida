@@ -13,9 +13,9 @@ $sql = "SELECT
             p.id_marca, 
             m.nombre AS marca, 
             p.nombre, 
-            dc.precio_unitario, 
+            dc.precio_unitario AS precio_compra, 
             p.imagen, 
-            p.precio AS precio_venta, 
+            p.precio AS precio_venta_real, 
             p.precio_pieza,
             c.nombre AS categoria, 
             c.id_categoria,
@@ -25,6 +25,12 @@ $sql = "SELECT
                     THEN p.precio
                 ELSE p.precio_pieza
             END AS precio_mostrar,
+
+            CASE 
+                WHEN uc.factor = 1 
+                    THEN p.precio
+                ELSE p.precio_pieza
+            END AS precio_venta_mostrar,
 
             co.total, 
             dc.cantidad, 
@@ -39,7 +45,21 @@ $sql = "SELECT
 
             pro.nombre AS nombre_proveedor, 
             dir.id_direccion, dir.calle, dir.num_ext, dir.num_int, 
-            dir.ciudad, dir.estado AS estado_dir, dir.codigo_postal
+            dir.ciudad, dir.estado AS estado_dir, dir.codigo_postal,
+
+            uc.factor,
+
+            CASE
+                WHEN uc.factor = 1 
+                    THEN (p.precio - dc.precio_unitario)
+                ELSE (p.precio_pieza - dc.precio_unitario)
+            END AS ganancia_unidad,
+
+            CASE
+                WHEN uc.factor = 1 
+                    THEN (p.precio - dc.precio_unitario) * dc.cantidad
+                ELSE (p.precio_pieza - dc.precio_unitario) * dc.cantidad
+            END AS ganancia_total
 
         FROM detalle_compra dc
         JOIN compras co ON dc.id_compra = co.id_compra
@@ -49,6 +69,9 @@ $sql = "SELECT
         JOIN marcas m ON p.id_marca = m.id_marca
         JOIN categorias c ON p.id_categoria = c.id_categoria
         JOIN unidades_medida u ON p.id_unidad_medida = u.id_unidad_medida
+        JOIN unidades_conversion uc 
+            ON uc.id_producto = p.id_producto 
+            AND uc.unidad_medida = dc.unidad_medida
         ORDER BY co.fecha DESC, co.hora DESC";
 ?>
 
@@ -63,17 +86,10 @@ $sql = "SELECT
     .stylish-card {
         transition: transform 0.25s ease, box-shadow 0.25s ease;
     }
-
     .stylish-card:hover {
         transform: translateY(-6px);
         box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
-
-    .total-text {
-        color: #008f39;
-        font-size: 1rem;
-    }
-
     .custom-orange-btn {
         background-color: #f68b1f !important;
         border: none;
@@ -81,11 +97,6 @@ $sql = "SELECT
     .custom-orange-btn:hover {
         background-color: #e67a12 !important;
     }
-
-    .card-body h5 {
-        font-size: 1.1rem;
-    }
-
     .card-hover {
         transition: 0.3s ease-in-out;
     }
@@ -98,15 +109,13 @@ $sql = "SELECT
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <title><?php echo $title; ?></title>
 
-<!-- Modal para añadir compras -->
-<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+<div class="modal fade" id="addModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header bg-custom-orange text-white">
-                <h5 class="modal-title" id="addModalLabel">Agregar Nueva Compra</h5>
+                <h5 class="modal-title">Agregar Nueva Compra</h5>
             </div>
 
             <form id="formShopping">
@@ -122,41 +131,41 @@ $sql = "SELECT
                                         JOIN productos p ON prov.id_producto = p.id_producto";
                             $pro_result = $conn->query($pro_sql);
                             while ($pro = $pro_result->fetch_assoc()) {
-                                echo "<option value='" . $pro['id_proveedor'] . "' 
-                                            data-producto-id='" . $pro['id_producto'] . "' 
-                                            data-producto-nombre='" . htmlspecialchars($pro['nombre_producto']) . "'>
-                                            " . htmlspecialchars($pro['nombre']) . "
-                                      </option>";
+                                echo "<option value='{$pro['id_proveedor']}'
+                                        data-producto-id='{$pro['id_producto']}'
+                                        data-producto-nombre='" . htmlspecialchars($pro['nombre_producto']) . "'>
+                                        {$pro['nombre']}
+                                    </option>";
                             }
                             ?>
                         </select>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="nombre_producto">Producto</label>
+                        <label>Producto</label>
                         <input type="text" id="nombre_producto" class="form-control" readonly>
                         <input type="hidden" name="id_producto" id="id_producto">
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="id_conversion">Unidad de Medida</label>
+                        <label>Unidad de Medida</label>
                         <select name="id_conversion" id="id_conversion" class="form-control" required>
                             <option value="">Seleccione una unidad de medida</option>
                         </select>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="cantidad">Cantidad</label>
+                        <label>Cantidad</label>
                         <input type="number" name="cantidad" id="cantidad" class="form-control" step="0.01" required>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="precio">Precio</label>
+                        <label>Precio</label>
                         <input type="number" name="precio" id="precio" class="form-control" step="0.01" required>
                     </div>
 
                     <div class="form-group mb-3">
-                        <label for="subtotal">Total</label>
+                        <label>Total</label>
                         <input type="number" name="subtotal" id="subtotal" class="form-control" readonly required>
                     </div>
 
@@ -172,7 +181,7 @@ $sql = "SELECT
 </div>
 
 <main class="flex-fill p-4 overflow-auto vh-100" id="main-content">
-    <div id="Alert" class="container"></div>
+
     <h2 class="fw-bold custom-orange-text text-center mb-4">Mis Compras</h2>
 
     <div class="d-flex justify-content-end mb-4">
@@ -181,22 +190,25 @@ $sql = "SELECT
             Nueva Compra
         </button>
     </div>
+
     <div class="container">
         <div class="row row-cols-1 row-cols-md-3 g-4">
 
-            <?php
-            $result = $conn->query($sql);
+        <?php
+        $result = $conn->query($sql);
 
-            if ($result->num_rows > 0) {
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
 
-                while ($row = $result->fetch_assoc()) {
-
-                    $direccion_completa = htmlspecialchars(
+                $direccion_completa =
+                    htmlspecialchars(
                         $row['calle'] . ' ' . $row['num_ext'] .
-                        ($row['num_int'] ? ' Int ' . $row['num_int'] : '') . ', ' .
-                        $row['ciudad'] . ', ' . $row['estado_dir'] . ' C.P. ' . $row['codigo_postal']
+                        ($row['num_int'] ? ' Int ' . $row['num_int'] : '') .
+                        ', ' . $row['ciudad'] . ', ' . $row['estado_dir'] .
+                        ' C.P. ' . $row['codigo_postal']
                     );
-            ?>
+        ?>
+
             <div class="col">
                 <div class="card shadow-lg rounded-4 h-100 border-0 card-hover stylish-card">
                     <div class="card-header text-center fw-semibold rounded-top-4 bg-custom-orange text-white">
@@ -208,42 +220,32 @@ $sql = "SELECT
                             <i class="fas fa-calendar-alt me-1"></i>
                             <strong>Fecha:</strong> <?= $row['fecha_hora'] ?>
                         </div>
+
                         <div class="text-center mb-3">
                             <img src="../../img/<?= htmlspecialchars($row['imagen']) ?>" 
                                 class="purchase-img-small">
                         </div>
+
                         <h5 class="fw-bold text-dark mb-2">
                             <i class="fas fa-tag me-2"></i><?= htmlspecialchars($row['nombre']) ?>
                         </h5>
+
                         <div class="text-muted small mb-3">
-                            <strong>
-                                <i class="fas fa-layer-group"></i>
-                                Categoría:
-                            </strong> <?= htmlspecialchars($row['categoria']) ?><br>
-                            <strong>
-                                <i class="fas fa-tag"></i>
-                                Marca:
-                            </strong> <?= htmlspecialchars($row['marca']) ?><br>
-                            <strong>
-                                <i class="fas fa-ruler"></i>
-                                Unidad Medida:
-                            </strong> <span class="text-primary fw-bold"><?= $row['unidad'] ?></span><br><br>
-                            <strong>
-                                <i class="fas fa-user-tie"></i>
-                                Proveedor:
-                            </strong> <?= htmlspecialchars($row['nombre_proveedor']) ?><br>
-                            <strong>
-                                <i class="fas fa-map-marked-alt"></i>
-                                Dirección Proveedor:
-                            </strong> <?= $direccion_completa ?>
+                            <strong><i class="fas fa-layer-group"></i> Categoría:</strong> <?= htmlspecialchars($row['categoria']) ?><br>
+                            <strong><i class="fas fa-tag"></i> Marca:</strong> <?= htmlspecialchars($row['marca']) ?><br>
+                            <strong><i class="fas fa-ruler"></i> Unidad Medida:</strong> 
+                            <span class="text-primary fw-bold"><?= $row['unidad'] ?></span><br><br>
+                            <strong><i class="fas fa-user-tie"></i> Proveedor:</strong> <?= htmlspecialchars($row['nombre_proveedor']) ?><br>
+                            <strong><i class="fas fa-map-marked-alt"></i> Dirección:</strong> <?= $direccion_completa ?>
                         </div>
-                           <div class="text-muted small mb-2">
-                            <strong >
-                                <i class="fas fa-dollar"></i>
-                                Precio Venta:
-                            </strong> <span class="text-primary fw-bold"><?= $row['precio_mostrar'] ?></span>
-                            
+
+                        <div class="text-muted small mb-2">
+                            <strong><i class="fas fa-dollar"></i> Precio Venta:</strong>
+                            <span class="text-primary fw-bold">
+                                $<?= number_format($row['precio_venta_mostrar'], 2) ?>
+                            </span>
                         </div>
+
                         <div class="d-flex justify-content-between mb-3">
                             <span class="fw-semibold text-secondary">
                                 <i class="fas fa-box me-1"></i>
@@ -252,23 +254,37 @@ $sql = "SELECT
 
                             <span class="fw-semibold text-secondary">
                                 <i class="fas fa-dollar me-1"></i>
-                                Precio Compra: <span class="text-primary fw-bold">$<?= $row['precio_unitario'] ?></span>
+                                Precio Compra: <span class="text-primary fw-bold">$<?= number_format($row['precio_compra'], 2) ?></span>
                             </span>
 
                             <span class="fw-semibold text-secondary">
                                 <i class="fas fa-dollar me-1"></i>
-                                Total: <span class="text-success fw-bold">$<?= $row['total'] ?></span>
+                                Total: <span class="text-success fw-bold">$<?= number_format($row['total'], 2) ?></span>
                             </span>
                         </div>
+                        <div class="mt-3 p-2 bg-light rounded-3 border">
+                            <h6 class="fw-bold text-success mb-1">
+                                <i class="fas fa-money-bill-wave"></i> Utilidad del Producto
+                            </h6>
+                            <div class="small">
+                                <strong>Ganancia por Unidad:</strong> 
+                                <span class="text-primary fw-bold">$<?= number_format($row['ganancia_unidad'], 2) ?></span><br>
+                                <strong>Ganancia Total:</strong> 
+                                <span class="text-success fw-bold">$<?= number_format($row['ganancia_total'], 2) ?></span>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
-            <?php
-                }
-            } else {
-                echo "<p class='text-center text-muted'>No hay compras realizadas.</p>";
+
+        <?php
             }
-            ?>
+        } else {
+            echo "<p class='text-center text-muted'>No hay compras realizadas.</p>";
+        }
+        ?>
+
         </div>
     </div>
 </main>
