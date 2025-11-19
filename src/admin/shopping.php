@@ -21,7 +21,7 @@ $sql = "SELECT
             c.id_categoria,
 
             CASE 
-                WHEN dc.unidad_medida IN ('Tonelada') 
+                WHEN uc.factor = 1 
                     THEN p.precio
                 ELSE p.precio_pieza
             END AS precio_mostrar,
@@ -181,7 +181,7 @@ $sql = "SELECT
 </div>
 
 <main class="flex-fill p-4 overflow-auto vh-100" id="main-content">
-
+<div id="Alert" class="container"></div>
     <h2 class="fw-bold custom-orange-text text-center mb-4">Mis Compras</h2>
 
     <div class="d-flex justify-content-end mb-4">

@@ -10,12 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $id_proveedor = intval($_POST['id_provedor'] ?? 0);
 $id_producto = intval($_POST['id_producto'] ?? 0);
 $id_conversion = intval($_POST['id_conversion'] ?? 0);
-$unidad_medida = $_POST['unidad_nombre'] ?? '';
 $cantidad = floatval($_POST['cantidad'] ?? 0);
 $precio = floatval($_POST['precio'] ?? 0);
 $subtotal = floatval($_POST['subtotal'] ?? 0);
 
-if (!$id_proveedor || !$id_producto || !$id_conversion || empty($unidad_medida)) {
+if (!$id_proveedor || !$id_producto || !$id_conversion) {
     echo json_encode(["status" => "warning", "message" => "Complete todos los campos."]);
     exit;
 }
@@ -24,16 +23,19 @@ $conn->begin_transaction();
 
 try {
 
-    $sqlFactor = "SELECT factor FROM unidades_conversion WHERE id_conversion = ? LIMIT 1";
-    $stmtFactor = $conn->prepare($sqlFactor);
-    $stmtFactor->bind_param("i", $id_conversion);
-    $stmtFactor->execute();
-    $resultFactor = $stmtFactor->get_result();
+    $sqlUnidad = "SELECT unidad_medida, factor FROM unidades_conversion WHERE id_conversion = ? LIMIT 1";
+    $stmtUnidad = $conn->prepare($sqlUnidad);
+    $stmtUnidad->bind_param("i", $id_conversion);
+    $stmtUnidad->execute();
+    $resultUnidad = $stmtUnidad->get_result();
 
     $factor = 1;
-    if ($resultFactor->num_rows > 0) {
-        $rowFactor = $resultFactor->fetch_assoc();
-        $factor = floatval($rowFactor['factor']);
+    $unidad_medida = "";
+
+    if ($resultUnidad->num_rows > 0) {
+        $rowUnidad = $resultUnidad->fetch_assoc();
+        $unidad_medida = trim($rowUnidad['unidad_medida']);
+        $factor = floatval($rowUnidad['factor']);
     }
 
     $cantidad_convertida = $cantidad * $factor;
@@ -68,7 +70,7 @@ try {
     $stmtStock = $conn->prepare($sqlStock);
     $stmtStock->bind_param("di", $cantidad_convertida, $id_producto);
     $stmtStock->execute();
-
+    
     $conn->commit();
 
     echo json_encode([
