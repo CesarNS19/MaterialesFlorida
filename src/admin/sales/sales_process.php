@@ -95,9 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_usuario'], $_POST[
                 $stmtDetalle->close();
                 break;
             }
-
             $stmtDetalle->close();
-            $conn->query("UPDATE productos SET stock = stock - $cantidad WHERE id_producto = $id_producto");
         }
 
         if ($ok) {

@@ -100,6 +100,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && (isset($_POST["product_code"]) || i
         $_SESSION['status_message'] = "Producto agregado al carrito.";
         $_SESSION['status_type'] = "success";
     }
+
+    $new_stock = $stock - 1;
+    $update_stock = $conn->prepare("UPDATE productos SET stock = ? WHERE id_producto = ?");
+    $update_stock->bind_param("ii", $new_stock, $id_producto);
+    $update_stock->execute();
+    
     header("Location: ../sales.php?id_usuario=" . $id_usuario);
     exit;
 }
