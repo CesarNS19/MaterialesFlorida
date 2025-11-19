@@ -15,10 +15,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && (isset($_POST["product_code"]) || i
     }
 
     if ($id_producto) {
-        $stmt = $conn->prepare("SELECT id_producto, precio, stock FROM productos WHERE id_producto = ?");
+        $stmt = $conn->prepare("SELECT id_producto, precio, stock, estado FROM productos WHERE id_producto = ?");
         $stmt->bind_param("i", $id_producto);
     } elseif ($codigo) {
-        $stmt = $conn->prepare("SELECT id_producto, precio, stock FROM productos WHERE codigo = ?");
+        $stmt = $conn->prepare("SELECT id_producto, precio, stock, estado FROM productos WHERE codigo = ?");
         $stmt->bind_param("s", $codigo);
     }
     $stmt->execute();
@@ -27,6 +27,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && (isset($_POST["product_code"]) || i
 
     if (!$row) {
         $_SESSION['status_message'] = "Producto no encontrado.";
+        $_SESSION['status_type'] = "warning";
+        header("Location: ../sales.php?id_usuario=" . $id_usuario);
+        exit;
+    }
+
+    if (strtolower($row['estado']) === 'inactivo') {
+        $_SESSION['status_message'] = "Producto no disponible.";
         $_SESSION['status_type'] = "warning";
         header("Location: ../sales.php?id_usuario=" . $id_usuario);
         exit;
@@ -78,7 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && (isset($_POST["product_code"]) || i
 
         $update = $conn->prepare("
             UPDATE carrito 
-            SET cantidad = ?, subtotal = ?, unidad_seleccionada = ? 
+            SET cantidad = ?, subtotal = ?, unidad_seleccionada = ?
             WHERE id_producto = ? AND id_usuario = ?
         ");
         $update->bind_param("idsii", $nueva_cantidad, $subtotal, $unidad_seleccionada, $id_producto, $id_usuario);
@@ -91,7 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && (isset($_POST["product_code"]) || i
         $subtotal = $precio;
 
         $insert = $conn->prepare("
-            INSERT INTO carrito (id_producto, id_usuario, cantidad, unidad_seleccionada) 
+            INSERT INTO carrito (id_producto, id_usuario, cantidad, unidad_seleccionada)
             VALUES (?, ?, ?, ?)
         ");
         $insert->bind_param("iiis", $id_producto, $id_usuario, $cantidad, $unidad_seleccionada);
@@ -105,7 +112,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && (isset($_POST["product_code"]) || i
     $update_stock = $conn->prepare("UPDATE productos SET stock = ? WHERE id_producto = ?");
     $update_stock->bind_param("ii", $new_stock, $id_producto);
     $update_stock->execute();
-    
+
     header("Location: ../sales.php?id_usuario=" . $id_usuario);
     exit;
 }

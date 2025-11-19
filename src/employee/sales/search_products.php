@@ -15,6 +15,7 @@ $stmt = $conn->prepare("
     FROM productos
     WHERE (codigo LIKE CONCAT('%', ?, '%') OR nombre LIKE CONCAT('%', ?, '%'))
       AND stock > 0
+      AND LOWER(estado) = 'activo'
     LIMIT 10
 ");
 $stmt->bind_param("ss", $query, $query);
