@@ -29,7 +29,7 @@ $userData = $result->fetch_assoc();
             <div class="mb-4">
                 <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Perfil Admin" class="rounded-circle" width="120">
             </div>
-            <h3 class="card-title text-primary fw-bold">Mi Perfil</h3>
+            <h3 class="card-title custom-orange-text fw-bold">Mi Perfil</h3>
             <ul class="list-group list-group-flush text-start">
                 <li class="list-group-item"><strong>Nombre:</strong> <?php echo $userData['nombre']; ?></li>
                 <li class="list-group-item"><strong>Apellido Paterno:</strong> <?php echo $userData['apellido_paterno']; ?></li>
@@ -38,7 +38,7 @@ $userData = $result->fetch_assoc();
                 <li class="list-group-item"><strong>Email:</strong> <?php echo $userData['email']; ?></li>
             </ul>
 
-            <button class="btn btn-primary mt-4 px-4 text-white" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+            <button class="btn custom-orange-btn mt-4 px-4 text-white" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                 <i class="fas fa-user-edit me-1"></i> Editar Perfil
             </button>
 
