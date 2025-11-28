@@ -46,17 +46,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'cesarneri803@gmail.com';
-            $mail->Password = 'kyoi thod ximj mipk';
+            $mail->Username = 'cesarnerisanchez127@gmail.com';
+            $mail->Password = 'pppm hbgx lmqk gfzw';
             $mail->SMTPSecure = 'tls';
-            $mail->Port = 587;
+            $mail->Port = 587;;
 
-            $mail->setFrom('cesarneri803@gmail.com', 'Materiales La Florida');
+            $mail->CharSet = 'UTF-8';
+            $mail->Encoding = 'base64';
+
+            $mail->setFrom('cesarnerisanchez127@gmail.com', 'Materiales La Florida');
             $mail->addAddress($email);
 
             $mail->isHTML(true);
             $mail->Subject = 'Recuperación de Contraseña';
-            $mail->Body = "Tu código para reestablecer tu contraseña es: $verification_code";
+            $mail->Body = "Tu código para reestablecer tu contraseña es: <b>$verification_code</b>";
 
             $mail->send();
 
