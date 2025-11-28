@@ -13,6 +13,28 @@ $stmt->execute();
 $result = $stmt->get_result();
 $userData = $result->fetch_assoc();
 ?>
+<style>
+    .toggle-pass {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+        font-size: 1rem;
+        transition: color 0.3s;
+    }
+
+    .toggle-pass:hover {
+        color: #000;
+    }
+
+    .form-control.is-valid,
+    .form-control.is-invalid {
+        background-image: none !important;
+        padding-right: 0.75rem !important;
+    }
+</style>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -88,13 +110,20 @@ $userData = $result->fetch_assoc();
                     </div>
 
                     <h6 class="custom-orange-text">Cambiar Contraseña (Opcional)</h6>
-                    <div class="mb-3">
-                        <label for="new_password" class="form-label">Nueva Contraseña</label>
-                        <input type="password" class="form-control" id="new_password" name="new_password">
+                    <div class="form-group mb-3">
+                        <label>Contraseña (8 caracteres mínimo)</label>
+                        <div class="position-relative">
+                            <input type="password" class="form-control" id="new_password" name="new_password" required data-bs-toggle="tooltip">
+                            <i class="fas fa-eye toggle-pass" onclick="togglePassword('new_password', this)"></i>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="confirm_password" class="form-label">Confirmar Nueva Contraseña</label>
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password">
+
+                    <div class="form-group mb-3">
+                        <label>Confirmar Contraseña</label>
+                        <div class="position-relative">
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required data-bs-toggle="tooltip">
+                            <i class="fas fa-eye toggle-pass" onclick="togglePassword('confirm_password', this)"></i>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -123,14 +152,26 @@ $userData = $result->fetch_assoc();
                     <?php else: ?>
                         <p class="text-muted">No tienes contraseña de caja. Ingresa una nueva para agregarla.</p>
                     <?php endif; ?>
-                    <div class="mb-3">
-                        <label for="caja_password" class="form-label">Contraseña de Caja</label>
-                        <input type="password" class="form-control" id="caja_password" name="caja_password" placeholder="Ingrese nueva contraseña" required>
+                    <div class="form-group mb-3">
+                        <label>Contraseña</label>
+                        <div class="position-relative">
+                            <input type="password" name="contrasena" id="contrasena" class="form-control" required data-bs-toggle="tooltip">
+                            <i class="fas fa-eye toggle-pass" onclick="togglePassword('contrasena', this)"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>Confirmar Contraseña</label>
+                        <div class="position-relative">
+                            <input type="password" name="confirmar_contrasena" id="confirmar_contrasena" class="form-control" required data-bs-toggle="tooltip">
+                            <i class="fas fa-eye toggle-pass" onclick="togglePassword('confirmar_contrasena', this)"></i>
+                        </div>
                     </div>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn custom-orange-btn text-white">Guardar</button>
+                    <button type="submit" id="btnGuardarCaja" class="btn custom-orange-btn text-white" disabled>Guardar</button>
                 </div>
             </form>
         </div>
@@ -138,6 +179,78 @@ $userData = $result->fetch_assoc();
 </div>
 
 <script>
+    function validarPasswordCaja() {
+        const pass = document.getElementById("contrasena");
+        const confirm = document.getElementById("confirmar_contrasena");
+        const btn = document.getElementById("btnGuardarCaja");
+
+        const coinciden = pass.value === confirm.value && pass.value !== "";
+
+        pass.classList.toggle("is-valid", coinciden);
+        pass.classList.toggle("is-invalid", !coinciden && confirm.value !== "");
+
+        confirm.classList.toggle("is-valid", coinciden);
+        confirm.classList.toggle("is-invalid", !coinciden && confirm.value !== "");
+
+        confirm.setAttribute("data-bs-original-title", coinciden ? "" : "Las contraseñas no coinciden");
+
+        btn.disabled = !coinciden;
+
+        bootstrap.Tooltip.getInstance(confirm)?.dispose();
+        if (!coinciden && confirm.value !== "") new bootstrap.Tooltip(confirm).show();
+    }
+
+    document.getElementById("contrasena").addEventListener("input", validarPasswordCaja);
+    document.getElementById("confirmar_contrasena").addEventListener("input", validarPasswordCaja);
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("btnGuardarCaja").disabled = true;
+        new bootstrap.Tooltip(document.getElementById("contrasena"));
+        new bootstrap.Tooltip(document.getElementById("confirmar_contrasena"));
+    });
+
+    function togglePassword(inputId, icon) {
+        const input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
+    function validarPasswordUser() {
+        const pass = document.getElementById("new_password");
+        const confirm = document.getElementById("confirm_password");
+        const btn = document.getElementById("btnUser");
+
+        const longitudValida = pass.value.length >= 8;
+        const coinciden = pass.value === confirm.value && pass.value !== "";
+
+        pass.classList.toggle("is-valid", longitudValida);
+        pass.classList.toggle("is-invalid", !longitudValida);
+        pass.setAttribute("data-bs-original-title", longitudValida ? "" : "Debe tener mínimo 8 caracteres");
+
+        confirm.classList.toggle("is-valid", coinciden);
+        confirm.classList.toggle("is-invalid", !coinciden);
+        confirm.setAttribute("data-bs-original-title", coinciden ? "" : "Las contraseñas no coinciden");
+
+        bootstrap.Tooltip.getInstance(pass)?.dispose();
+        bootstrap.Tooltip.getInstance(confirm)?.dispose();
+
+        if (!longitudValida) new bootstrap.Tooltip(pass).show();
+        if (!coinciden && confirm.value !== "") new bootstrap.Tooltip(confirm).show();
+    }
+
+    document.getElementById("new_password").addEventListener("input", validarPasswordUser);
+    document.getElementById("confirm_password").addEventListener("input", validarPasswordUser);
+
+    document.addEventListener("DOMContentLoaded", () => {
+        new bootstrap.Tooltip(document.getElementById("new_password"));
+        new bootstrap.Tooltip(document.getElementById("confirm_password"));
+    });
+
     function mostrarToast(titulo, mensaje, tipo) {
             let icon = '';
             let alertClass = '';

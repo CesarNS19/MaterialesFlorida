@@ -2,10 +2,10 @@
 session_start();
 include "../../../mysql/connection.php";
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['caja_password'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contrasena'])) {
     
     $id_usuario = $_SESSION['id_usuario'];
-    $password_caja = trim($_POST['caja_password']);
+    $password_caja = trim($_POST['contrasena']);
 
     if (empty($password_caja)) {
         $_SESSION['status_message'] = "La contraseña no puede estar vacía.";

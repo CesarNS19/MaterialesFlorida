@@ -88,6 +88,27 @@ if (isset($_SESSION['status_message'])) {
             background-color: #e67600;
             border-color: #e67600;
         }
+
+        .toggle-pass {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6c757d;
+            font-size: 1rem;
+            transition: color 0.3s;
+        }
+
+        .toggle-pass:hover {
+            color: #000;
+        }
+
+        .form-control.is-valid,
+        .form-control.is-invalid {
+            background-image: none !important;
+            padding-right: 0.75rem !important;
+        }
     </style>
 </head>
 
@@ -115,15 +136,22 @@ if (isset($_SESSION['status_message'])) {
                             <label for="code" class="form-label">Código de Recuperación</label>
                             <input id="code" type="text" name="code" class="form-control" placeholder="Ingrese el código" required>
                         </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Nueva Contraseña</label>
-                            <input id="password" type="password" name="password" class="form-control" placeholder="Nueva Contraseña" required>
+                        <div class="form-group mb-3">
+                        <label>Contraseña (8 caracteres mínimo)</label>
+                        <div class="position-relative">
+                            <input type="password" name="contrasena" id="contrasena" class="form-control" required data-bs-toggle="tooltip">
+                            <i class="fas fa-eye toggle-pass" onclick="togglePassword('contrasena', this)"></i>
                         </div>
-                        <div class="mb-3">
-                            <label for="confirm_password" class="form-label">Confirmar Contraseña</label>
-                            <input id="confirm_password" type="password" name="confirm_password" class="form-control" placeholder="Confirmar Contraseña" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>Confirmar Contraseña</label>
+                        <div class="position-relative">
+                            <input type="password" name="confirm_password" id="confirm_password" class="form-control" required data-bs-toggle="tooltip">
+                            <i class="fas fa-eye toggle-pass" onclick="togglePassword('confirm_password', this)"></i>
                         </div>
-                        <button type="submit" class="btn custom-orange-btn w-100 mb-3">Restablecer Contraseña</button>
+                    </div>
+                        <button id="btnSubmit" type="submit" class="btn custom-orange-btn w-100 mb-3">Restablecer Contraseña</button>
                         <div class="text-center mt-2">
                             <a href="login.php" class="link-secondary text-decoration-none">¿Ya tienes una cuenta? Inicia sesión aquí</a>
                         </div>
@@ -135,6 +163,51 @@ if (isset($_SESSION['status_message'])) {
 </div>
 
 <script>
+function validarPasswordsEmpleado() {
+        const pass = document.getElementById("contrasena");
+        const confirm = document.getElementById("confirm_password");
+        const btn = document.getElementById("btnSubmit");
+
+        const longitudValida = pass.value.length >= 8;
+        const coinciden = pass.value === confirm.value && pass.value !== "";
+
+        pass.classList.toggle("is-valid", longitudValida);
+        pass.classList.toggle("is-invalid", !longitudValida);
+        pass.setAttribute("data-bs-original-title", longitudValida ? "" : "Debe tener mínimo 8 caracteres");
+
+        confirm.classList.toggle("is-valid", coinciden);
+        confirm.classList.toggle("is-invalid", !coinciden);
+        confirm.setAttribute("data-bs-original-title", coinciden ? "" : "Las contraseñas no coinciden");
+
+        btn.disabled = !(longitudValida && coinciden);
+
+        bootstrap.Tooltip.getInstance(pass)?.dispose();
+        bootstrap.Tooltip.getInstance(confirm)?.dispose();
+
+        if (!longitudValida) new bootstrap.Tooltip(pass).show();
+        if (!coinciden && confirm.value !== "") new bootstrap.Tooltip(confirm).show();
+    }
+
+    document.getElementById("contrasena").addEventListener("input", validarPasswordsEmpleado);
+    document.getElementById("confirm_password").addEventListener("input", validarPasswordsEmpleado);
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("btnSubmit").disabled = true;
+        new bootstrap.Tooltip(document.getElementById("contrasena"));
+        new bootstrap.Tooltip(document.getElementById("confirm_password"));
+    });
+
+    function togglePassword(inputId, icon) {
+        const input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+
 function mostrarToast(titulo, mensaje, tipo) {
             let icon = '';
             let alertClass = '';
@@ -191,6 +264,5 @@ function mostrarToast(titulo, mensaje, tipo) {
             <?php endif; ?>
         });
 </script>
-
 </body>
 </html>

@@ -18,6 +18,30 @@ $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u
         JOIN direcciones d ON u.id_direccion = d.id_direccion
         WHERE p.nombre = 'Empleado'" . $searchQuery;
 ?>
+
+<style>
+    .toggle-pass {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+        font-size: 1rem;
+        transition: color 0.3s;
+    }
+
+    .toggle-pass:hover {
+        color: #000;
+    }
+
+    .form-control.is-valid,
+    .form-control.is-invalid {
+        background-image: none !important;
+        padding-right: 0.75rem !important;
+    }
+</style>
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -27,6 +51,7 @@ $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u
 
 <div id="Alert" class="container"></div>
 
+<!-- Modal para agregar empleado -->
     <div class="modal fade" id="addEmployeesModal" tabindex="-1" role="dialog" aria-labelledby="addEmployeesModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -70,17 +95,24 @@ $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u
                         <input type="email" name="email" class="form-control" required>
                     </div>
                     <div class="form-group mb-3">
-                        <label>Contraseña</label>
-                        <input type="password" name="contrasena" class="form-control" required>
+                        <label>Contraseña (8 caracteres mínimo)</label>
+                        <div class="position-relative">
+                            <input type="password" name="contrasena" id="contrasena" class="form-control" required data-bs-toggle="tooltip">
+                            <i class="fas fa-eye toggle-pass" onclick="togglePassword('contrasena', this)"></i>
+                        </div>
                     </div>
+
                     <div class="form-group mb-3">
                         <label>Confirmar Contraseña</label>
-                        <input type="password" name="confirmar_contrasena" class="form-control" required>
+                        <div class="position-relative">
+                            <input type="password" name="confirmar_contrasena" id="confirmar_contrasena" class="form-control" required data-bs-toggle="tooltip">
+                            <i class="fas fa-eye toggle-pass" onclick="togglePassword('confirmar_contrasena', this)"></i>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button type="submit" class="btn custom-orange-btn text-white">Agregar Empleado</button>
+                    <button id= "btnAgregarEmpleado" type="submit" class="btn custom-orange-btn text-white">Agregar Empleado</button>
                 </div>
             </form>
         </div>
@@ -234,6 +266,50 @@ $sql = "SELECT u.id_usuario, u.nombre, u.apellido_paterno, u.apellido_materno, u
 </div>
 
 <script>
+    function validarPasswordsEmpleado() {
+        const pass = document.getElementById("contrasena");
+        const confirm = document.getElementById("confirmar_contrasena");
+        const btn = document.getElementById("btnAgregarEmpleado");
+
+        const longitudValida = pass.value.length >= 8;
+        const coinciden = pass.value === confirm.value && pass.value !== "";
+
+        pass.classList.toggle("is-valid", longitudValida);
+        pass.classList.toggle("is-invalid", !longitudValida);
+        pass.setAttribute("data-bs-original-title", longitudValida ? "" : "Debe tener mínimo 8 caracteres");
+
+        confirm.classList.toggle("is-valid", coinciden);
+        confirm.classList.toggle("is-invalid", !coinciden);
+        confirm.setAttribute("data-bs-original-title", coinciden ? "" : "Las contraseñas no coinciden");
+
+        btn.disabled = !(longitudValida && coinciden);
+
+        bootstrap.Tooltip.getInstance(pass)?.dispose();
+        bootstrap.Tooltip.getInstance(confirm)?.dispose();
+
+        if (!longitudValida) new bootstrap.Tooltip(pass).show();
+        if (!coinciden && confirm.value !== "") new bootstrap.Tooltip(confirm).show();
+    }
+
+    document.getElementById("contrasena").addEventListener("input", validarPasswordsEmpleado);
+    document.getElementById("confirmar_contrasena").addEventListener("input", validarPasswordsEmpleado);
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("btnAgregarEmpleado").disabled = true;
+        new bootstrap.Tooltip(document.getElementById("contrasena"));
+        new bootstrap.Tooltip(document.getElementById("confirmar_contrasena"));
+    });
+
+    function togglePassword(inputId, icon) {
+        const input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
 
     $(document).ready(function() {
         $('#search').on('input', function() {

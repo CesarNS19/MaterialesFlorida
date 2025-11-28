@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($contrasena !== $confirmar_contrasena) {
         $_SESSION['status_message'] = "Las contraseñas no coinciden.";
-        $_SESSION['status_type'] = "danger";
+        $_SESSION['status_type'] = "error";
         header("Location: ../employees.php");
         exit();
     }
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($checkEmailResult->num_rows > 0) {
         $_SESSION['status_message'] = "El correo electrónico ya está registrado, intente con otro.";
-        $_SESSION['status_type'] = "danger";
+        $_SESSION['status_type'] = "info";
     } else {
         $hashed_password = password_hash($contrasena, PASSWORD_DEFAULT);
 
@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $_SESSION['status_type'] = "success";
         } else {
             $_SESSION['status_message'] = "Error al agregar el empleado: " . $stmt->error;
-            $_SESSION['status_type'] = "danger";
+            $_SESSION['status_type'] = "error";
         }
 
         $stmt->close();
